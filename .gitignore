@@ -1,0 +1,25 @@
+# WeChat Developer Tools local preferences
+project.private.config.json
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+
+# Runtime configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs and local caches
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.py[cod]
