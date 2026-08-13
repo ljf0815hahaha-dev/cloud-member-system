@@ -1,0 +1,9 @@
+<view class="vehicle-head"><view class="eyebrow">VEHICLE ARCHIVE</view><view class="title">我的车辆</view><view class="subtitle">车辆资料由门店工作人员维护</view></view>
+<view class="container vehicle-list">
+  <view class="card vehicle-card" wx:for="{{vehicles}}" wx:key="_id">
+    <view class="plate-row"><view class="plate">{{item.plateNumber}}</view><view class="default" wx:if="{{item.isDefault}}">默认车辆</view></view>
+    <view class="model">{{item.brand || "未填写品牌"}} {{item.model}}</view>
+    <view class="details"><text>颜色：{{item.color || "未填写"}}</text><text wx:if="{{item.vin}}">VIN：{{item.vin}}</text></view>
+  </view>
+  <view class="empty" wx:if="{{!vehicles.length}}">暂无车辆档案，请联系门店添加</view>
+</view>

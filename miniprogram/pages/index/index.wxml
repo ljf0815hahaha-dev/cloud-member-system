@@ -1,0 +1,29 @@
+<view class="hero">
+  <view class="hero-brand">膜享会员</view>
+  <view class="hero-subtitle">专业贴膜服务，全程记录可查</view>
+</view>
+<view class="container content-offset">
+  <swiper class="banner" indicator-dots autoplay circular interval="5000" wx:if="{{notices.length}}">
+    <swiper-item wx:for="{{notices}}" wx:key="_id">
+      <image wx:if="{{item.image}}" class="banner-image" src="{{item.image}}" mode="aspectFill" />
+      <view wx:else class="banner-title-card">{{item.title}}</view>
+    </swiper-item>
+  </swiper>
+
+  <view class="card balance-card" wx:if="{{isLoggedIn}}">
+    <view class="balance-top"><view><view class="balance-label">会员可用余额</view><view class="member">{{memberName}}</view></view><view class="member-badge">会员</view></view>
+    <view class="balance">{{balanceText}}</view>
+    <view class="balance-tip">余额变动由门店工作人员当面确认并录入</view>
+  </view>
+
+  <view class="quick-grid" wx:if="{{isLoggedIn}}">
+    <view class="quick-card" bindtap="goLogs"><view class="quick-icon red">账</view><view><view class="quick-title">消费明细</view><view class="quick-desc">充值与消费流水</view></view></view>
+    <view class="quick-card" bindtap="goFilms"><view class="quick-icon teal">膜</view><view><view class="quick-title">贴膜档案</view><view class="quick-desc">车辆、膜信息和质保</view></view></view>
+    <view class="quick-card" bindtap="goVehicles"><view class="quick-icon teal">车</view><view><view class="quick-title">我的车辆</view><view class="quick-desc">车牌与车型档案</view></view></view>
+  </view>
+
+  <view class="card service-card"><view class="section-heading">门店服务</view><view class="service-row"><text>服务记录永久留档</text><text>照片可随时查看</text></view><view class="service-row"><text>余额流水清晰透明</text><text>线下支付更灵活</text></view></view>
+
+  <view class="login-card" wx:if="{{!loading && !isLoggedIn}}"><view class="login-title">查看您的专属会员账户</view><view class="login-desc">登录后可查询余额、消费明细与贴膜服务档案</view><button class="button-primary" bindtap="goLogin">立即登录</button></view>
+  <button class="logout-button" wx:if="{{isLoggedIn}}" bindtap="logout">{{devMode ? "退出演示登录" : "隐藏会员信息"}}</button>
+</view>

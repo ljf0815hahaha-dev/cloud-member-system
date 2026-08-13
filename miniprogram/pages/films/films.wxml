@@ -1,0 +1,9 @@
+<view class="archive-head"><view class="eyebrow">SERVICE ARCHIVE</view><view class="title">我的贴膜档案</view><view class="subtitle">门店施工完成后上传，顾客只可查看</view></view>
+<view class="container archive-list">
+  <view class="card record-card" wx:for="{{records}}" wx:key="_id">
+    <view class="record-head"><view><view class="date">{{item.timeText}}</view><view class="remark">{{item.remark || "贴膜服务记录"}}</view></view><view class="count">{{item.images.length}} 张</view></view>
+    <view class="structured"><view><text>车辆</text>{{item.vehicleText}}</view><view><text>膜信息</text>{{item.filmText}}</view><view><text>施工位置</text>{{item.positionText}}</view><view><text>质保</text>{{item.warrantyText}}</view><view wx:if="{{item.mileageKm}}"><text>施工里程</text>{{item.mileageKm}} km</view></view>
+    <scroll-view class="images" scroll-x wx:if="{{item.images.length}}"><image wx:for="{{item.images}}" wx:for-item="image" wx:key="*this" src="{{image}}" mode="aspectFill" data-images="{{item.images}}" data-current="{{image}}" bindtap="preview" /></scroll-view>
+    <view class="record-footer"><text>服务资料已归档</text><text>点击照片查看大图</text></view>
+  </view><view class="empty" wx:if="{{!records.length}}">暂无贴膜档案</view>
+</view>

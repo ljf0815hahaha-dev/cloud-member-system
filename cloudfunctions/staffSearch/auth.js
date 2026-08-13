@@ -1,0 +1,14 @@
+function unauthorized(message = "店员登录已过期") { const error = new Error(message); error.code = "UNAUTHORIZED"; return error }
+async function requireStaff(db, token, roles = ["staff", "admin"]) {
+  if (!token || typeof token !== "string") throw unauthorized()
+  const session = (await db.collection("staff_sessions").doc(token).get().catch(() => ({ data: null }))).data
+  const expireAt = session && new Date(session.expireAt).getTime()
+  if (!session || !Number.isFinite(expireAt) || expireAt <= Date.now() || !["staff", "admin"].includes(session.role) || !roles.includes(session.role)) throw unauthorized()
+  const staff = (await db.collection("staff").doc(session.staffId).get().catch(() => ({ data: null }))).data
+  if (!staff || staff.status !== 1 || staff.role !== session.role || !["staff", "admin"].includes(staff.role)) throw unauthorized("店员账号不可用")
+  const staffTokenVersion = staff.tokenVersion == null ? 1 : Number(staff.tokenVersion)
+  if (session.tokenVersion == null ? staff.tokenVersion != null && staffTokenVersion !== 1 : Number(session.tokenVersion) !== staffTokenVersion) throw unauthorized()
+  return staff
+}
+function resultFromError(error) { if (error && error.code === "UNAUTHORIZED") return { code: 401, message: error.message }; console.error(error); return { code: 500, message: "服务暂时不可用，请稍后重试" } }
+module.exports = { requireStaff, resultFromError }

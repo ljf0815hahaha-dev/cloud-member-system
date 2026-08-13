@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>膜享门店工作台</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="app" class="app-shell">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">膜</span><div><strong>膜享门店工作台</strong><small>会员与服务档案管理</small></div></div>
+    <div class="operator"><span id="staff-name"></span><button id="logout" class="ghost hidden">退出</button></div>
+  </header>
+
+  <main id="login-view" class="login-view">
+    <section class="login-visual"><div class="visual-badge">汽车贴膜会员系统</div><h1>让每一次充值与服务<br>都有清晰记录</h1><p>余额流水、混合结算、贴膜照片与门店权限统一管理。</p></section>
+    <section class="panel login-panel">
+      <div class="eyebrow">STAFF ACCESS</div><h2>登录工作台</h2><p id="login-hint" class="hidden">演示店长：manager / 123456<br>演示店员：staff / 123456</p>
+      <label>账号<input id="account" autocomplete="username" placeholder="请输入账号"></label>
+      <label>密码<input id="password" type="password" autocomplete="current-password" placeholder="请输入密码"></label>
+      <button id="login" class="primary">登录工作台</button><div id="login-error" class="error"></div>
+    </section>
+  </main>
+
+  <main id="workbench" class="workbench hidden">
+    <section class="dashboard-head"><div><div class="eyebrow">STORE OVERVIEW</div><h1>今日门店工作</h1><p>先查询会员，再执行充值、消费结算或服务记录。</p></div><div class="date-chip" id="today-label"></div></section>
+    <section class="stats-grid">
+      <article class="stat-card"><span>会员数</span><strong id="stat-members">0</strong><small>当前可查询会员</small></article>
+      <article class="stat-card"><span>今日充值</span><strong id="stat-recharge">¥0.00</strong><small>已确认线下收款</small></article>
+      <article class="stat-card"><span>今日消费</span><strong id="stat-settlement">¥0.00</strong><small>余额与线下合计</small></article>
+      <article class="stat-card accent"><span>当前模式</span><strong id="mode-value"></strong><small id="mode-detail"></small></article>
+    </section>
+
+    <section class="panel search-panel">
+      <div class="section-title"><div><div class="eyebrow">MEMBER SEARCH</div><h2>查询会员</h2></div><span id="search-hint" class="hidden">演示手机号：13800138000</span></div>
+      <div class="search-box"><input id="mobile" inputmode="numeric" maxlength="11" placeholder="输入顾客手机号"><button id="search" class="primary compact">查询</button></div>
+      <div id="search-error" class="error"></div><div id="member-card" class="member-card hidden"></div>
+    </section>
+
+    <section id="actions" class="actions hidden">
+      <nav class="tabs"><button class="tab active" data-tab="recharge">余额充值</button><button class="tab" data-tab="settle">消费结算</button><button class="tab" data-tab="vehicles">车辆档案</button><button class="tab" data-tab="film">贴膜档案</button><button id="admin-tab" class="tab hidden" data-tab="admin">店长管理</button></nav>
+      <div class="panel action-panel" data-panel="recharge">
+        <div class="action-header"><div><div class="eyebrow">BALANCE RECHARGE</div><h2>会员充值</h2></div><span class="status-dot">线下确认收款后录入</span></div>
+        <div class="form-grid"><label>充值金额（元）<input id="recharge-amount" inputmode="decimal" placeholder="例如 500"></label><label>收款方式<select id="recharge-method"><option value="wechat">微信</option><option value="alipay">支付宝</option><option value="cash">现金</option></select></label><label class="wide">备注（选填）<input id="recharge-remark" maxlength="100" placeholder="例如：会员储值"></label></div><button id="recharge" class="primary action-button">确认充值</button>
+      </div>
+      <div class="panel action-panel hidden" data-panel="settle">
+        <div class="action-header"><div><div class="eyebrow">MIXED SETTLEMENT</div><h2>消费结算</h2></div><span class="status-dot">余额优先，不足线下补齐</span></div>
+        <div class="form-grid"><label>消费总额（元）<input id="settle-amount" inputmode="decimal" placeholder="例如 350"></label><label>消费项目<select id="consume-item"></select></label><label id="offline-method-wrap" class="hidden">线下补付方式<select id="offline-method"><option value="wechat">微信</option><option value="alipay">支付宝</option><option value="cash">现金</option></select></label><label class="wide">备注（选填）<input id="settle-remark" maxlength="100" placeholder="服务说明"></label></div><div id="settlement-preview" class="calculation">输入消费金额后显示结算拆分</div><button id="settle" class="primary action-button">确认结算</button>
+      </div>
+      <div class="panel action-panel hidden" data-panel="vehicles">
+        <div class="action-header"><div><div class="eyebrow">VEHICLE ARCHIVE</div><h2>车辆档案</h2></div><span class="status-dot">店员可维护当前会员车辆</span></div>
+        <div id="vehicle-list" class="vehicle-list"></div>
+        <input id="vehicle-id" type="hidden"><input id="vehicle-version" type="hidden" value="0">
+        <div class="form-grid"><label>车牌号<input id="vehicle-plate" maxlength="10" placeholder="例如 粤B12345"></label><label>品牌<input id="vehicle-brand" maxlength="30" placeholder="例如 特斯拉"></label><label>车型<input id="vehicle-model" maxlength="30" placeholder="例如 Model Y"></label><label>颜色<input id="vehicle-color" maxlength="20"></label><label class="wide">VIN<input id="vehicle-vin" maxlength="40"></label><label class="check-label"><input id="vehicle-default" type="checkbox">设为默认车辆</label></div>
+        <div class="inline"><button id="save-vehicle" class="primary">保存车辆</button><button id="cancel-vehicle" class="ghost">清空表单</button></div>
+      </div>
+      <div class="panel action-panel hidden" data-panel="film">
+        <div class="action-header"><div><div class="eyebrow">FILM ARCHIVE</div><h2>新增贴膜档案</h2></div><span class="status-dot">顾客只读不可删除</span></div>
+        <div class="form-grid"><label>服务车辆<select id="film-vehicle"></select></label><label>服务日期<input id="film-service-date" type="date"></label><label>贴膜类别<select id="film-category"><option value="window">玻璃膜</option><option value="ppf">漆面保护膜</option><option value="colorChange">改色膜</option><option value="other">其他</option></select></label><label>膜品牌<input id="film-brand" maxlength="50"></label><label>膜系列<input id="film-series" maxlength="50"></label><label>膜型号<input id="film-model" maxlength="50"></label><label>质保（月）<input id="film-warranty" inputmode="numeric" value="0"></label><label>施工里程（km）<input id="film-mileage" inputmode="numeric" value="0"></label></div>
+        <label>施工位置</label><div id="film-positions" class="check-grid"><label><input type="checkbox" value="frontWindshield">前挡</label><label><input type="checkbox" value="rearWindshield">后挡</label><label><input type="checkbox" value="leftFront">左前窗</label><label><input type="checkbox" value="rightFront">右前窗</label><label><input type="checkbox" value="leftRear">左后窗</label><label><input type="checkbox" value="rightRear">右后窗</label><label><input type="checkbox" value="sunroof">天窗</label><label><input type="checkbox" value="fullBody">全车</label><label><input type="checkbox" value="partialBody">局部车身</label><label><input type="checkbox" value="other">其他</label></div>
+        <label>服务照片（1-9张）<input id="film-images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="image-preview" class="image-preview"></div><label>服务备注<textarea id="film-remark" maxlength="200" placeholder="施工说明与注意事项"></textarea></label><button id="add-film" class="primary action-button">保存贴膜记录</button>
+      </div>
+      <div class="panel action-panel hidden" data-panel="admin">
+        <div class="action-header"><div><div class="eyebrow">MANAGER CENTER</div><h2>店长管理</h2></div><span class="status-dot">仅店长可操作</span></div>
+        <div class="admin-grid"><div><h3>员工管理</h3><div id="staff-list" class="admin-list"></div><label>账号<input id="new-staff-account"></label><label>姓名<input id="new-staff-name"></label><label>初始密码<input id="new-staff-password" type="password" placeholder="至少6位"></label><label>角色<select id="new-staff-role"><option value="staff">店员</option><option value="admin">店长</option></select></label><button id="add-staff" class="primary">新增员工</button></div><div><h3>消费项目</h3><div id="consume-items-list" class="admin-list"></div><div class="inline"><input id="new-consume-item" placeholder="新增项目"><button id="add-consume-item" class="primary compact">添加</button></div></div><div><h3>公告</h3><div id="notice-list" class="admin-list"></div><label>公告标题<input id="new-notice-title" placeholder="公告标题"></label><label>公告图片<input id="new-notice-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div id="new-notice-preview" class="image-preview"></div><button id="add-notice" class="primary compact">添加公告</button></div><div><h3>最近流水</h3><div id="admin-log-list" class="admin-list"></div></div></div>
+      </div>
+      <div id="action-message" class="message"></div>
+    </section>
+  </main>
+</div>
+<script src="./config.js" charset="UTF-8"></script>
+<script src="./mock-service.js" charset="UTF-8"></script>
+<script src="https://unpkg.com/@cloudbase/js-sdk@latest/dist/cloudbase.full.js"></script>
+<script src="./app.js" charset="UTF-8"></script>
+</body>
+</html>

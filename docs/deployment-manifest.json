@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "purpose": "部署准备与只读自检清单；不提供一键部署能力",
+  "status": "prepared-not-deployed",
+  "configuration": {
+    "placeholder": "YOUR_CLOUDBASE_ENV_ID",
+    "miniprogram": {
+      "file": "miniprogram/app.js",
+      "envIdPath": "globalData.envId",
+      "devModePath": "globalData.devMode"
+    },
+    "h5": {
+      "file": "staff-h5/config.js",
+      "envIdPath": "window.STAFF_APP_CONFIG.envId",
+      "devModePath": "window.STAFF_APP_CONFIG.devMode"
+    },
+    "productionDevMode": false,
+    "sameEnvironmentRequired": true
+  },
+  "miniprogram": {
+    "root": "miniprogram/",
+    "appId": "wxfd38d9b1de5af197",
+    "appConfig": "miniprogram/app.json",
+    "sitemap": "miniprogram/sitemap.json"
+  },
+  "h5": {
+    "root": "staff-h5/",
+    "entry": "staff-h5/index.html",
+    "charset": "UTF-8",
+    "hostingTarget": "CloudBase 静态网站托管"
+  },
+  "collections": [
+    "users",
+    "balance_logs",
+    "operation_requests",
+    "vehicles",
+    "film_records",
+    "notices",
+    "staff",
+    "staff_sessions",
+    "consume_items"
+  ],
+  "cloudFunctions": [
+    "memberLogin",
+    "memberData",
+    "getNotices",
+    "getLogs",
+    "getFilms",
+    "memberVehicles",
+    "staffLogin",
+    "sessionValidate",
+    "staffSearch",
+    "getConsumeItems",
+    "staffRecharge",
+    "staffSettle",
+    "staffListVehicles",
+    "staffSaveVehicle",
+    "staffAddFilm",
+    "adminData",
+    "adminAddStaff",
+    "adminUpdateStaff",
+    "adminAddItem",
+    "adminUpdateItem",
+    "adminAddNotice",
+    "adminUpdateNotice",
+    "adminRevoke"
+  ],
+  "cloudFunctionFiles": {
+    "requiredForAll": [
+      "index.js",
+      "package.json"
+    ],
+    "authRequired": [
+      "sessionValidate",
+      "staffSearch",
+      "getConsumeItems",
+      "staffRecharge",
+      "staffSettle",
+      "staffListVehicles",
+      "staffSaveVehicle",
+      "staffAddFilm",
+      "adminData",
+      "adminAddStaff",
+      "adminUpdateStaff",
+      "adminAddItem",
+      "adminUpdateItem",
+      "adminAddNotice",
+      "adminUpdateNotice",
+      "adminRevoke"
+    ],
+    "authFile": "auth.js",
+    "nonDeployableDirectories": [
+      "common"
+    ]
+  },
+  "manualGates": [
+    "取得并填写真实 envId",
+    "小程序与 H5 devMode 均切换为 false",
+    "人工确认并安装项目已有 package.json 声明的依赖，不猜测或改写版本",
+    "创建集合、索引并配置数据库与存储权限",
+    "确认 H5 CloudBase JS SDK 的明确可用加载方式",
+    "创建首个强密码店长与消费项目初始数据",
+    "完成 docs/test-checklist.md 真机测试"
+  ]
+}

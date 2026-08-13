@@ -1,0 +1,9 @@
+<view class="summary"><view><text>累计充值</text><strong>{{rechargeTotal}}</strong></view><view><text>累计消费</text><strong>{{settlementTotal}}</strong></view></view>
+<view class="container logs-container">
+  <view class="filters"><button class="{{activeFilter === 'all' ? 'active' : ''}}" data-type="all" bindtap="filter">全部</button><button class="{{activeFilter === 'recharge' ? 'active' : ''}}" data-type="recharge" bindtap="filter">充值</button><button class="{{activeFilter === 'settlement' ? 'active' : ''}}" data-type="settlement" bindtap="filter">消费</button></view>
+  <view class="card log-card" wx:for="{{logs}}" wx:key="_id">
+    <view class="row"><view><text class="type-badge {{item.type}}">{{item.typeText}}</text><text class="item-title">{{item.consumeItem || item.remark || '余额变动'}}</text></view><text class="amount {{item.type}}">{{item.amountText}}</text></view>
+    <view class="detail" wx:if="{{item.consumeItem}}"><text>余额支付 {{item.balancePaidText}}</text><text>线下支付 {{item.offlinePaidText}}</text></view>
+    <view class="footer"><text>变动后余额 {{item.afterBalanceText}}</text><text>{{item.timeText}}</text></view>
+  </view><view class="empty" wx:if="{{!logs.length}}">当前分类暂无记录</view>
+</view>
