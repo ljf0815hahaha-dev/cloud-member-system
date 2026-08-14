@@ -11,12 +11,12 @@
 <body>
 <div id="app" class="app-shell">
   <header class="topbar">
-    <div class="brand"><span class="brand-mark">膜</span><div><strong>膜享门店工作台</strong><small>会员与服务档案管理</small></div></div>
+    <div class="brand"><span class="brand-mark">洗</span><div><strong>洗护门店工作台</strong><small>洗车、贴膜与会员经营</small></div></div>
     <div class="operator"><span id="staff-name"></span><button id="logout" class="ghost hidden">退出</button></div>
   </header>
 
   <main id="login-view" class="login-view">
-    <section class="login-visual"><div class="visual-badge">汽车贴膜会员系统</div><h1>让每一次充值与服务<br>都有清晰记录</h1><p>余额流水、混合结算、贴膜照片与门店权限统一管理。</p></section>
+    <section class="login-visual"><div class="visual-badge">CAR CARE OPERATIONS</div><h1>把今天的预约、收款与施工<br>放在同一个工作台</h1><p>洗车预约、会员储值、混合结算、贴膜质保和车辆档案，一次看清。</p></section>
     <section class="panel login-panel">
       <div class="eyebrow">STAFF ACCESS</div><h2>登录工作台</h2><p id="login-hint" class="hidden">演示店长：manager / 123456<br>演示店员：staff / 123456</p>
       <label>账号<input id="account" autocomplete="username" placeholder="请输入账号"></label>
@@ -26,7 +26,7 @@
   </main>
 
   <main id="workbench" class="workbench hidden">
-    <section class="dashboard-head"><div><div class="eyebrow">STORE OVERVIEW</div><h1>今日门店工作</h1><p>先查询会员，再执行充值、消费结算或服务记录。</p></div><div class="date-chip" id="today-label"></div></section>
+    <section class="dashboard-head"><div><div class="eyebrow">STORE OVERVIEW</div><h1>今日门店工作</h1><p>先处理待确认预约，再完成会员收款、洗车服务与贴膜施工留档。</p></div><div class="date-chip" id="today-label"></div></section>
     <section class="stats-grid">
       <article class="stat-card"><span>会员数</span><strong id="stat-members">0</strong><small>当前可查询会员</small></article>
       <article class="stat-card"><span>今日充值</span><strong id="stat-recharge">¥0.00</strong><small>已确认线下收款</small></article>
@@ -34,10 +34,12 @@
       <article class="stat-card accent"><span>当前模式</span><strong id="mode-value"></strong><small id="mode-detail"></small></article>
     </section>
 
+    <section class="panel appointment-panel"><div class="section-title"><div><div class="eyebrow">STORE APPOINTMENTS</div><h2>预约工作台</h2></div><div class="inline"><select id="appointment-status"><option value="pending">待确认</option><option value="confirmed">已确认</option><option value="completed">已完成</option><option value="cancelled">已取消</option></select><button id="refresh-appointments" class="ghost">刷新</button></div></div><div id="appointment-list" class="admin-list"><div class="log">正在加载预约…</div></div></section>
+
     <section class="panel search-panel">
       <div class="section-title"><div><div class="eyebrow">MEMBER SEARCH</div><h2>查询会员</h2></div><span id="search-hint" class="hidden">演示手机号：13800138000</span></div>
       <div class="search-box"><input id="mobile" inputmode="numeric" maxlength="11" placeholder="输入顾客手机号"><button id="search" class="primary compact">查询</button></div>
-      <div id="search-error" class="error"></div><div id="member-card" class="member-card hidden"></div>
+       <div id="search-error" class="error"></div><div class="inline member-tools"><button id="new-member" class="ghost">新建会员</button></div><div id="member-create" class="member-create hidden"><div class="form-grid"><label>会员称呼<input id="member-name" maxlength="40" autocomplete="name" placeholder="例如：张先生"></label><label>手机号<input id="member-mobile" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="请输入手机号"></label></div><div class="inline"><button id="save-member" class="primary compact">保存会员</button><button id="cancel-member" class="ghost">取消</button></div></div><div id="member-card" class="member-card hidden"></div>
     </section>
 
     <section id="actions" class="actions hidden">
@@ -65,7 +67,7 @@
       </div>
       <div class="panel action-panel hidden" data-panel="admin">
         <div class="action-header"><div><div class="eyebrow">MANAGER CENTER</div><h2>店长管理</h2></div><span class="status-dot">仅店长可操作</span></div>
-        <div class="admin-grid"><div><h3>员工管理</h3><div id="staff-list" class="admin-list"></div><label>账号<input id="new-staff-account"></label><label>姓名<input id="new-staff-name"></label><label>初始密码<input id="new-staff-password" type="password" placeholder="至少6位"></label><label>角色<select id="new-staff-role"><option value="staff">店员</option><option value="admin">店长</option></select></label><button id="add-staff" class="primary">新增员工</button></div><div><h3>消费项目</h3><div id="consume-items-list" class="admin-list"></div><div class="inline"><input id="new-consume-item" placeholder="新增项目"><button id="add-consume-item" class="primary compact">添加</button></div></div><div><h3>公告</h3><div id="notice-list" class="admin-list"></div><label>公告标题<input id="new-notice-title" placeholder="公告标题"></label><label>公告图片<input id="new-notice-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div id="new-notice-preview" class="image-preview"></div><button id="add-notice" class="primary compact">添加公告</button></div><div><h3>最近流水</h3><div id="admin-log-list" class="admin-list"></div></div></div>
+        <div class="admin-grid"><div><h3>员工管理</h3><div id="staff-list" class="admin-list"></div><label>账号<input id="new-staff-account"></label><label>姓名<input id="new-staff-name"></label><label>初始密码<input id="new-staff-password" type="password" placeholder="至少6位"></label><label>角色<select id="new-staff-role"><option value="staff">店员</option><option value="admin">店长</option></select></label><button id="add-staff" class="primary">新增员工</button></div><div><h3>消费项目</h3><div id="consume-items-list" class="admin-list"></div><div class="inline"><input id="new-consume-item" placeholder="新增项目"><input id="new-consume-price" type="number" min="0" step="0.01" placeholder="参考价（元）"><button id="add-consume-item" class="primary compact">添加</button></div></div><div><h3>公告</h3><div id="notice-list" class="admin-list"></div><label>公告标题<input id="new-notice-title" placeholder="公告标题"></label><label>公告图片<input id="new-notice-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div id="new-notice-preview" class="image-preview"></div><button id="add-notice" class="primary compact">添加公告</button></div><div><h3>最近流水</h3><div id="admin-log-list" class="admin-list"></div></div></div>
       </div>
       <div id="action-message" class="message"></div>
     </section>

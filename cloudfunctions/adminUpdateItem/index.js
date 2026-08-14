@@ -13,6 +13,7 @@ exports.main = async event => {
     const patch = {}
     if (Object.prototype.hasOwnProperty.call(event, "name")) { patch.name = String(event.name || "").trim().slice(0, 50); if (!patch.name) return { code: 400, message: "消费项目名称不能为空" } }
     if (Object.prototype.hasOwnProperty.call(event, "sort")) { patch.sort = Number(event.sort); if (!Number.isSafeInteger(patch.sort)) return { code: 400, message: "消费项目排序必须为整数" } }
+    if (Object.prototype.hasOwnProperty.call(event, "priceFen")) { patch.priceFen = Number(event.priceFen); if (!Number.isSafeInteger(patch.priceFen) || patch.priceFen < 0 || patch.priceFen > 100000000) return { code: 400, message: "服务价格不合法" } }
     if (Object.prototype.hasOwnProperty.call(event, "status")) { patch.status = Number(event.status); if (![0, 1].includes(patch.status)) return { code: 400, message: "消费项目状态不合法" } }
     if (!Object.keys(patch).length) return { code: 400, message: "没有可更新的消费项目字段" }
     const updated = await db.runTransaction(async transaction => {

@@ -24,6 +24,7 @@ Page({
     }
   },
   goLogin() { wx.navigateTo({ url: "/pages/login/login" }) },
+  goBooking() { wx.navigateTo({ url: "/pages/booking/booking" }) },
   logout() {
     const app = getApp()
     if (app.globalData.devMode) require("../../utils/mock").logout()

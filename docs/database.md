@@ -24,6 +24,8 @@ Indexes:
 - `openid`: unique
 - `mobile`: unique, sparse if phone authorization is completed later
 
+门店提前建档的会员不要写入空字符串 `openid`，保持字段缺失；顾客首次手机号登录后再绑定微信 OpenID。
+
 ### balance_logs
 
 ```json
@@ -148,6 +150,21 @@ Indexes: `{ userId: 1, plateKey: 1 }` unique、`{ userId: 1, isDefault: -1, upda
 
 Index: `{ status: 1, sort: 1 }`
 
+### appointments
+
+```json
+{
+  "_id": "auto",
+  "userId": "users._id",
+  "serviceType": "wash | detail | film | coating | other",
+  "appointmentDate": "2026-08-14",
+  "timeSlot": "10:00",
+  "status": "pending | confirmed | completed | cancelled"
+}
+```
+
+Indexes: `{ userId: 1, createTime: -1 }`、`{ status: 1, appointmentDate: 1, timeSlot: 1 }`。
+
 ### staff
 
 ```json
@@ -187,6 +204,7 @@ Index: `expireAt` with TTL expiry; `staffId` normal index.
 {
   "_id": "auto",
   "name": "汽车贴膜",
+  "priceFen": 0,
   "sort": 10,
   "status": 1,
   "version": 1,
@@ -195,7 +213,7 @@ Index: `expireAt` with TTL expiry; `staffId` normal index.
 }
 ```
 
-Seed values: 汽车贴膜、玻璃膜、车衣、洗车、精洗、汽车美容、其他。
+`priceFen` 是门店参考价，收银时可自动带入但店员仍可按实际订单修改。Seed values: 汽车贴膜、玻璃膜、车衣、洗车、精洗、汽车美容、其他。
 
 ## Access rules
 

@@ -1,4 +1,4 @@
 window.STAFF_APP_CONFIG = {
-  envId: "YOUR_CLOUDBASE_ENV_ID",
-  devMode: true
+  envId: "cloud1-d0gsnjigez022bd620",
+  devMode: false
 }

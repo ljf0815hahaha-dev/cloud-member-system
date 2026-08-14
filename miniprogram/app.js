@@ -1,7 +1,7 @@
 App({
   globalData: {
-    envId: "YOUR_CLOUDBASE_ENV_ID",
-    devMode: true
+    envId: "cloud1-d0gsnjigez022bd620",
+    devMode: false
   },
   onLaunch() {
     if (this.globalData.devMode) return

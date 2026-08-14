@@ -71,9 +71,24 @@
   }
   function renderConsumeItems(items) {
     state.consumeItems = items.map(item => typeof item === "string" ? { id: item, name: item, sort: 0 } : { ...item, id: idOf(item) })
-    $("consume-item").replaceChildren(...state.consumeItems.map(item => { const option = el("option", item.name); option.value = item.id; return option }))
+    $("consume-item").replaceChildren(...state.consumeItems.map(item => { const option = el("option", item.priceFen ? `${item.name} · ${yuan(item.priceFen)}` : item.name); option.value = item.id; option.dataset.priceFen = String(item.priceFen || 0); return option }))
   }
   async function loadConsumeItems() { renderConsumeItems(await call("getConsumeItems", { token: state.token })) }
+  async function loadAppointments() {
+    if (!state.staff) return
+    const target = $("appointment-list")
+    try {
+      const appointments = await call("staffAppointments", { token: state.token, action: "list", status: $("appointment-status").value })
+      target.replaceChildren()
+      if (!appointments.length) { target.append(el("div", "暂无待确认预约", "log")); return }
+      appointments.forEach(item => {
+        const row = el("div", null, "admin-row"), vehicle = item.vehicleSnapshot && item.vehicleSnapshot.plateNumber ? ` · ${item.vehicleSnapshot.plateNumber}` : "", info = el("span", `${item.appointmentDate} ${item.timeSlot} · ${item.memberName || "会员"}\n${({ wash: "洗车", detail: "精洗美容", film: "贴膜服务", coating: "镀晶/车衣", other: "其他服务" })[item.serviceType] || item.serviceType}${vehicle}`), actions = el("div", null, "inline")
+        const transitions = item.status === "pending" ? [["确认", "confirmed"], ["取消", "cancelled"]] : item.status === "confirmed" ? [["完成", "completed"], ["取消", "cancelled"]] : []
+        transitions.forEach(([label, status]) => { const button = el("button", label, "ghost"); button.addEventListener("click", () => submitting(button, async () => { if (status === "cancelled" && !confirm("确认取消该预约？")) return; await call("staffAppointments", { token: state.token, action: "update", appointmentId: idOf(item), status }); message(`预约已${label}`); await loadAppointments() })); actions.append(button) })
+        row.append(info, actions); target.append(row)
+      })
+    } catch (error) { target.replaceChildren(el("div", error.message, "error")) }
+  }
   async function refreshOverview() {
     if (!state.staff) return
     $("today-label").textContent = new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "short" })
@@ -99,8 +114,9 @@
   }
   function renderItemAdmin(items) {
     renderAdminRows($("consume-items-list"), items.map(item => {
-      const row = el("div", null, "admin-edit-row"), controls = el("div", null, "admin-controls"), name = field(item.name), sort = field(item.sort, "number")
-      controls.append(name, sort, actionButton("保存", async () => { await call("adminUpdateItem", { token: state.token, itemId: idOf(item), version: item.version || 1, name: name.value, sort: Number(sort.value) }); message("消费项目已更新"); await loadAdmin() }), actionButton(item.status === 1 ? "停用" : "启用", async () => { await call("adminUpdateItem", { token: state.token, itemId: idOf(item), version: item.version || 1, status: item.status === 1 ? 0 : 1 }); message("消费项目状态已更新"); await loadAdmin() }))
+      const row = el("div", null, "admin-edit-row"), controls = el("div", null, "admin-controls"), name = field(item.name), price = field(((Number(item.priceFen) || 0) / 100).toFixed(2), "number"), sort = field(item.sort, "number")
+      price.min = "0"; price.step = "0.01"; price.title = "参考价（元）"
+      controls.append(name, price, sort, actionButton("保存", async () => { await call("adminUpdateItem", { token: state.token, itemId: idOf(item), version: item.version || 1, name: name.value, priceFen: fen(price.value), sort: Number(sort.value) }); message("消费项目已更新"); await loadAdmin() }), actionButton(item.status === 1 ? "停用" : "启用", async () => { await call("adminUpdateItem", { token: state.token, itemId: idOf(item), version: item.version || 1, status: item.status === 1 ? 0 : 1 }); message("消费项目状态已更新"); await loadAdmin() }))
       row.append(el("div", item.status === 1 ? "启用" : "停用"), controls); return row
     }), "暂无消费项目")
   }
@@ -168,7 +184,7 @@
     return state.app.uploadFile({ cloudPath: `notices/${Date.now()}-${random}.${suffix}`, filePath: file }).then(res => res.fileID)
   }
   async function activateSession(profile) {
-    state.staff = profile; showApp(); await loadConsumeItems(); await refreshOverview()
+    state.staff = profile; showApp(); await Promise.all([loadConsumeItems(), refreshOverview(), loadAppointments()])
   }
   async function boot() {
     $("mode-value").textContent = config.devMode ? "本地演示" : "云端正式"
@@ -193,17 +209,23 @@
     try { const data = await call("staffLogin", { account, password }); state.token = data.token; const profile = { name: data.name, role: data.role, account: data.account }; localStorage.setItem("staff_session", JSON.stringify({ token: data.token, expireAt: new Date(data.expireAt).getTime() || Number(data.expireAt), tokenVersion: data.tokenVersion })); localStorage.setItem("staff_profile", JSON.stringify(profile)); const validatedProfile = await call("sessionValidate", { token: data.token }); localStorage.setItem("staff_profile", JSON.stringify(validatedProfile)); await activateSession(validatedProfile) } catch (error) { clearSession(); showApp(); setLoginError(error.message) }
   })
   $("logout").addEventListener("click", () => { clearSession(); showApp() })
+  $("refresh-appointments").addEventListener("click", loadAppointments)
+  $("appointment-status").addEventListener("change", loadAppointments)
+  $("new-member").addEventListener("click", () => { $("member-create").classList.remove("hidden"); $("member-name").focus() })
+  $("cancel-member").addEventListener("click", () => { $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = "" })
+  $("save-member").addEventListener("click", () => submitting($("save-member"), async () => { try { const data = await call("staffSaveMember", { token: state.token, name: $("member-name").value.trim(), mobile: $("member-mobile").value.trim() }); $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = ""; $("mobile").value = data.mobile; renderMember(await call("staffSearch", { token: state.token, mobile: data.mobile })); message("会员已建档，可继续充值、结算与新增服务记录") } catch (error) { message(error.message, "error") } }))
   $("search").addEventListener("click", async () => { setSearchError(); try { renderMember(await call("staffSearch", { token: state.token, mobile: $("mobile").value.trim() })) } catch (error) { setSearchError(error.message); if (error.message.includes("过期") || error.message.includes("不可用")) $("logout").click() } })
   document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", async () => { document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item === tab)); document.querySelectorAll(".action-panel").forEach(panel => panel.classList.toggle("hidden", panel.dataset.panel !== tab.dataset.tab)); message(""); if (tab.dataset.tab === "admin") try { await loadAdmin() } catch (error) { message(error.message, "error") } }))
   $("film-images").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("image-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "待上传照片"; return image })) } catch (error) { event.target.value = ""; $("image-preview").replaceChildren(); message(error.message, "error") } })
   $("settle-amount").addEventListener("input", updateSettlementPreview)
+  $("consume-item").addEventListener("change", () => { const option = $("consume-item").selectedOptions[0], priceFen = Number(option && option.dataset.priceFen); if (Number.isSafeInteger(priceFen) && priceFen > 0 && !$("settle-amount").value) { $("settle-amount").value = (priceFen / 100).toFixed(2); updateSettlementPreview() } })
   $("recharge").addEventListener("click", () => submitting($("recharge"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const data = await call("staffRecharge", { token: state.token, requestId: getRequestId("recharge"), userId: state.member.id, amount: fen($("recharge-amount").value), payMethod: $("recharge-method").value, remark: $("recharge-remark").value }); clearRequestId("recharge"); $("recharge-amount").value = ""; await Promise.all([searchCurrentMember(), refreshOverview()]); message(`${data.replayed ? "充值请求已确认" : "充值成功"}，结余 ${yuan(data.afterBalance)}`) } catch (error) { message(error.message, "error") } }))
   $("settle").addEventListener("click", () => submitting($("settle"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const total = fen($("settle-amount").value), offline = Math.max(0, total - state.member.balance); const data = await call("staffSettle", { token: state.token, requestId: getRequestId("settlement"), userId: state.member.id, totalAmount: total, consumeItemId: $("consume-item").value, offlinePayMethod: offline ? $("offline-method").value : "none", remark: $("settle-remark").value }); clearRequestId("settlement"); $("settle-amount").value = ""; await Promise.all([searchCurrentMember(), refreshOverview()]); updateSettlementPreview(); message(`${data.replayed ? "结算请求已确认" : "结算完成"}：余额支付 ${yuan(data.balancePaid)}，线下补付 ${yuan(data.offlinePaid)}，结余 ${yuan(data.afterBalance)}`) } catch (error) { message(error.message, "error") } }))
   $("save-vehicle").addEventListener("click", () => submitting($("save-vehicle"), async () => { try { if (!state.member) throw new Error("请先查询会员"); await call("staffSaveVehicle", { token: state.token, userId: state.member.id, vehicleId: $("vehicle-id").value, version: Number($("vehicle-version").value), plateNumber: $("vehicle-plate").value, brand: $("vehicle-brand").value, model: $("vehicle-model").value, color: $("vehicle-color").value, vin: $("vehicle-vin").value, isDefault: $("vehicle-default").checked, status: 1 }); clearVehicleForm(); await searchCurrentMember(); message("车辆档案已保存") } catch (error) { message(error.message, "error") } }))
   $("cancel-vehicle").addEventListener("click", clearVehicleForm)
   $("add-film").addEventListener("click", () => submitting($("add-film"), async () => { try { if (!state.member) throw new Error("请先查询会员"); if (!$("film-vehicle").value) throw new Error("请先新增并选择车辆"); message("照片上传中..."); const images = await uploadImages($("film-images").files); await call("staffAddFilm", { token: state.token, userId: state.member.id, vehicleId: $("film-vehicle").value, serviceDate: $("film-service-date").value, filmCategory: $("film-category").value, filmBrand: $("film-brand").value, filmSeries: $("film-series").value, filmModel: $("film-model").value, installPosition: Array.from(document.querySelectorAll("#film-positions input:checked")).map(item => item.value), warrantyMonths: Number($("film-warranty").value), mileageKm: Number($("film-mileage").value), images, remark: $("film-remark").value }); message("贴膜记录已保存，顾客端可立即查看"); $("film-images").value = ""; $("film-remark").value = ""; $("image-preview").replaceChildren() } catch (error) { message(error.message, "error") } }))
   $("add-staff").addEventListener("click", async () => { try { await call("adminAddStaff", { token: state.token, account: $("new-staff-account").value.trim(), name: $("new-staff-name").value.trim(), password: $("new-staff-password").value, role: $("new-staff-role").value }); message("员工账号已创建"); $("new-staff-account").value = $("new-staff-name").value = $("new-staff-password").value = ""; await loadAdmin() } catch (error) { message(error.message, "error") } })
-  $("add-consume-item").addEventListener("click", async () => { try { await call("adminAddItem", { token: state.token, name: $("new-consume-item").value.trim(), sort: state.consumeItems.length * 10 + 10, status: 1 }); $("new-consume-item").value = ""; message("消费项目已添加"); await loadAdmin() } catch (error) { message(error.message, "error") } })
+  $("add-consume-item").addEventListener("click", async () => { try { const price = $("new-consume-price").value; await call("adminAddItem", { token: state.token, name: $("new-consume-item").value.trim(), priceFen: price ? fen(price) : 0, sort: state.consumeItems.length * 10 + 10, status: 1 }); $("new-consume-item").value = ""; $("new-consume-price").value = ""; message("消费项目已添加"); await loadAdmin() } catch (error) { message(error.message, "error") } })
   $("new-notice-image").addEventListener("change", event => { try { const file = validateNoticeImage(event.target.files), image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "待上传公告图片"; $("new-notice-preview").replaceChildren(image) } catch (error) { event.target.value = ""; $("new-notice-preview").replaceChildren(); message(error.message, "error") } })
   $("add-notice").addEventListener("click", async () => { try { const files = $("new-notice-image").files, image = files.length ? await uploadNoticeImage(files) : ""; await call("adminAddNotice", { token: state.token, title: $("new-notice-title").value.trim(), image, sort: 0, status: 1 }); $("new-notice-title").value = ""; $("new-notice-image").value = ""; $("new-notice-preview").replaceChildren(); message("公告已添加"); await loadAdmin() } catch (error) { message(error.message, "error") } })
   boot()
