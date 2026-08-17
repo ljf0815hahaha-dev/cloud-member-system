@@ -8,10 +8,10 @@
     "pages/login/login"
   ],
   "window": {
-    "navigationBarTitleText": "会员服务",
-    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "ESCAPE车房",
+    "navigationBarBackgroundColor": "#111111",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f5f7fb"
+    "backgroundColor": "#f2f0eb"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"
