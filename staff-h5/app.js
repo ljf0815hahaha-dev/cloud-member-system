@@ -27,6 +27,7 @@
     const active = Boolean(state.token && state.staff)
     $("login-view").classList.toggle("hidden", active); $("workbench").classList.toggle("hidden", !active); $("logout").classList.toggle("hidden", !active)
     $("admin-tab").classList.toggle("hidden", !(active && state.staff.role === "admin"))
+    $("admin-shortcut").classList.toggle("hidden", !(active && state.staff.role === "admin"))
     $("staff-name").replaceChildren()
     if (active) {
       $("staff-name").append(document.createTextNode(`${state.staff.name} · ${state.staff.role === "admin" ? "店长" : "店员"}`))
@@ -267,6 +268,7 @@
   $("logout").addEventListener("click", () => { clearSession(); showApp() })
   $("refresh-appointments").addEventListener("click", loadAppointments)
   $("appointment-status").addEventListener("change", loadAppointments)
+  $("admin-shortcut").addEventListener("click", () => { $("admin-tab").click(); $("admin-tab").scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }) })
   $("load-more-members").addEventListener("click", () => submitting($("load-more-members"), () => loadMembers()))
   $("work-order-before").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("work-order-before-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "施工前照片预览"; return image })) } catch (error) { event.target.value = ""; $("work-order-before-preview").replaceChildren(); message(error.message, "error") } })
   $("create-work-order").addEventListener("click", () => submitting($("create-work-order"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const beforeImages = await uploadWorkOrderImages($("work-order-before").files, "before"); await call("staffWorkOrders", { token: state.token, action: "create", userId: state.member.id, vehicleId: $("work-order-vehicle").value, serviceName: $("work-order-service").value.trim(), assignedStaffId: $("work-order-staff").value, expectedDeliveryAt: $("work-order-delivery").value, beforeImages, remark: $("work-order-remark").value.trim() }); $("work-order-service").value = ""; $("work-order-delivery").value = ""; $("work-order-before").value = ""; $("work-order-before-preview").replaceChildren(); $("work-order-remark").value = ""; await loadWorkOrders(); message("施工工单已创建") } catch (error) { message(error.message, "error") } }))

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./styles.css?v=20260817-2">
   <link rel="stylesheet" href="./responsive.css?v=20260817-2">
   <link rel="stylesheet" href="./work-orders.css?v=20260817-2">
+  <link rel="stylesheet" href="./admin-shortcut.css?v=20260817-3">
 </head>
 <body>
 <div id="app" class="app-shell">
@@ -28,7 +29,7 @@
   </main>
 
   <main id="workbench" class="workbench hidden">
-    <section class="dashboard-head"><div><div class="eyebrow">STORE OVERVIEW</div><h1>今日门店工作</h1><p>先处理待确认预约，再完成会员收款、洗车服务与贴膜施工留档。</p></div><div class="date-chip" id="today-label"></div></section>
+    <section class="dashboard-head"><div><div class="eyebrow">STORE OVERVIEW</div><h1>今日门店工作</h1><p>先处理待确认预约，再完成会员收款、洗车服务与贴膜施工留档。</p></div><div class="dashboard-actions"><div class="date-chip" id="today-label"></div><button id="admin-shortcut" class="ghost hidden">会员总览 / 店长管理</button></div></section>
     <section class="stats-grid">
       <article class="stat-card"><span>会员数</span><strong id="stat-members">0</strong><small>当前可查询会员</small></article>
       <article class="stat-card"><span>今日充值</span><strong id="stat-recharge">¥0.00</strong><small>已确认线下收款</small></article>
