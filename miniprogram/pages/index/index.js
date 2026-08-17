@@ -36,9 +36,9 @@ Page({
   goVehicles() { wx.navigateTo({ url: "/pages/vehicles/vehicles" }) },
   navigateStore() {
     wx.openLocation({
-      latitude: 32.0862655,
-      longitude: 118.7504826,
-      name: "ESCAPE车房",
+      latitude: 32.087311653621946,
+      longitude: 118.76375064253804,
+      name: "EP车房·改色·车衣·精洗",
       address: "南京市鼓楼区挹江门街道洪庙一巷8号红五月硅巷5栋102",
       scale: 18
     })
