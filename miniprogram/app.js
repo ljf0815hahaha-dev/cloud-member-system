@@ -1,6 +1,6 @@
 App({
   globalData: {
-    envId: "cloud1-d0gsnjigez022bd620",
+    envId: "cloud1-d0gsnjege022bd620",
     devMode: false
   },
   onLaunch() {
