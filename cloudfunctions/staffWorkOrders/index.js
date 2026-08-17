@@ -29,7 +29,14 @@ exports.main = async event => {
     if (action === "list") {
       const userId = asText(event.userId, 64)
       if (!userId) return { code: 400, message: "缺少会员信息" }
-      const result = await db.collection("work_orders").where({ userId }).limit(100).get()
+      let result
+      try {
+        result = await db.collection("work_orders").where({ userId }).limit(100).get()
+      } catch (error) {
+        // Fresh environments may not contain optional work-order history yet.
+        if (Number(error && error.errCode) === -502005) return { code: 0, data: [] }
+        throw error
+      }
       const orders = result.data.sort((a, b) => new Date(b.createTime || 0).getTime() - new Date(a.createTime || 0).getTime())
       return { code: 0, data: orders.map(({ _id, ...item }) => ({ id: _id, ...item })) }
     }

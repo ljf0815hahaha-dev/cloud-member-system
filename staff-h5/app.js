@@ -52,7 +52,7 @@
     const main = el("div", null, "member-main"), info = el("div"), name = el("div", state.member.name || "会员", "member-name"), mobile = el("div", state.member.mobile, "member-mobile")
     info.append(name, mobile); main.append(info, el("div", yuan(state.member.balance), "member-balance"))
     const logs = el("div"); renderLogs(logs, data.recentLogs || [])
-    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); $("active-member-name").textContent = state.member.name || "会员"; $("active-member-meta").textContent = `${state.member.mobile} · 余额 ${yuan(state.member.balance)}`; $("active-member-context").classList.remove("hidden"); renderVehicles(); updateSettlementPreview(); loadWorkOrders().catch(error => { $("work-order-list").replaceChildren(el("div", error.message, "error")) })
+    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); $("active-member-name").textContent = state.member.name || "会员"; $("active-member-meta").textContent = `${state.member.mobile} · 余额 ${yuan(state.member.balance)}`; $("active-member-context").classList.remove("hidden"); renderVehicles(); updateWorkOrderMemberHint(); updateSettlementPreview(); loadWorkOrders().catch(error => { $("work-order-list").replaceChildren(el("div", error.message, "error")) })
   }
   function clearVehicleForm() { $("vehicle-id").value = ""; $("vehicle-version").value = "0"; $("vehicle-plate").value = ""; $("vehicle-brand").value = ""; $("vehicle-model").value = ""; $("vehicle-color").value = ""; $("vehicle-vin").value = ""; $("vehicle-default").checked = false }
   function renderVehicles() {
@@ -68,6 +68,14 @@
     const vehicleOptions = activeVehicles.map(vehicle => { const option = el("option", `${vehicle.plateNumber} ${vehicle.brand || ""} ${vehicle.model || ""}`); option.value = vehicle.id; option.selected = Boolean(vehicle.isDefault); return option })
     $("film-vehicle").replaceChildren(...vehicleOptions)
     $("work-order-vehicle").replaceChildren(...activeVehicles.map(vehicle => { const option = el("option", `${vehicle.plateNumber} ${vehicle.brand || ""} ${vehicle.model || ""}`); option.value = vehicle.id; option.selected = Boolean(vehicle.isDefault); return option }))
+  }
+  function updateWorkOrderMemberHint() {
+    const hint = $("work-order-member-hint")
+    if (!state.member) { hint.textContent = "请先在上方查询会员，再创建施工工单。"; return }
+    const vehicleCount = state.vehicles.filter(item => item.status === 1).length
+    hint.textContent = vehicleCount
+      ? `当前会员：${state.member.name || "会员"}（${state.member.mobile}）· 请选定服务车辆后创建施工工单。`
+      : `当前会员：${state.member.name || "会员"}（${state.member.mobile}）· 尚未建立车辆档案，请先到“车辆档案”新增车辆。`
   }
   function statusText(status) { return ({ pending: "待施工", inProgress: "施工中", completed: "待签收" })[status] || status }
   function renderWorkOrders(orders) {
@@ -222,6 +230,7 @@
   }
   async function openAdminPanel() {
     if (!state.staff || state.staff.role !== "admin") { message("当前账号没有店长权限", "error"); return }
+    $("actions").classList.remove("hidden")
     document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item.dataset.tab === "admin"))
     document.querySelectorAll(".action-panel").forEach(panel => panel.classList.toggle("hidden", panel.dataset.panel !== "admin"))
     try {
