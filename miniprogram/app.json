@@ -10,7 +10,7 @@
   "window": {
     "navigationBarTitleText": "ESCAPE车房",
     "navigationBarBackgroundColor": "#111111",
-    "navigationBarTextStyle": "black",
+    "navigationBarTextStyle": "white",
     "backgroundColor": "#f2f0eb"
   },
   "style": "v2",
