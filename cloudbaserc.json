@@ -14,6 +14,7 @@
     { "name": "staffLogin", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "sessionValidate", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "staffSearch", "runtime": "Nodejs20.19", "handler": "index.main" },
+    { "name": "staffMembers", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "staffSaveMember", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "staffAppointments", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "getConsumeItems", "runtime": "Nodejs20.19", "handler": "index.main" },

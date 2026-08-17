@@ -3,7 +3,7 @@
   const cachedSession = JSON.parse(localStorage.getItem("staff_session") || "null")
   const cachedProfile = JSON.parse(localStorage.getItem("staff_profile") || "null")
   const validCachedSession = cachedSession && cachedProfile && Number(cachedSession.expireAt) > Date.now()
-  const state = { app: null, token: validCachedSession ? cachedSession.token : "", staff: validCachedSession ? cachedProfile : null, member: null, consumeItems: [], vehicles: [] }
+  const state = { app: null, token: validCachedSession ? cachedSession.token : "", staff: validCachedSession ? cachedProfile : null, member: null, consumeItems: [], vehicles: [], members: [], memberOffset: 0, memberTotal: 0, memberHasMore: false }
   const $ = id => document.getElementById(id)
   const fen = value => { const text = String(value).trim(); return /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(text) ? Math.round(Number(text) * 100) : NaN }
   const yuan = value => `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -102,6 +102,23 @@
     } catch (error) { console.warn("overview unavailable", error) }
   }
   function renderAdminRows(target, rows, emptyText) { target.replaceChildren(...(rows.length ? rows : [el("div", emptyText)])) }
+  function renderMemberOverview() {
+    const target = $("member-overview-list")
+    target.replaceChildren(...(state.members.length ? state.members.map(member => {
+      const row = el("div", null, "member-overview-row"), info = el("div"), name = el("strong", member.name || "会员"), detail = el("span", `${member.mobile} · 余额 ${yuan(member.balance)}`), button = el("button", "查看", "ghost")
+      button.addEventListener("click", async () => { $("mobile").value = member.mobile; try { renderMember(await call("staffSearch", { token: state.token, mobile: member.mobile })); $("actions").scrollIntoView({ behavior: "smooth", block: "start" }) } catch (error) { message(error.message, "error") } })
+      info.append(name, detail); row.append(info, button); return row
+    }) : [el("div", "暂无会员", "log")]))
+    $("member-overview-summary").textContent = `已展示 ${state.members.length} / ${state.memberTotal} 位会员`
+    $("load-more-members").classList.toggle("hidden", !state.memberHasMore)
+  }
+  async function loadMembers(reset = false) {
+    if (!state.staff || state.staff.role !== "admin") return
+    if (reset) { state.members = []; state.memberOffset = 0; state.memberTotal = 0; state.memberHasMore = false }
+    const data = await call("staffMembers", { token: state.token, offset: state.memberOffset, pageSize: 20 })
+    state.members.push(...data.members); state.memberOffset = data.nextOffset; state.memberTotal = data.total; state.memberHasMore = data.hasMore
+    renderMemberOverview()
+  }
   function field(value, type = "text") { const input = document.createElement("input"); input.type = type; input.value = value == null ? "" : String(value); return input }
   function actionButton(text, handler) { const button = el("button", text, "ghost"); button.addEventListener("click", () => submitting(button, handler)); return button }
   function renderStaffAdmin(items) {
@@ -135,7 +152,7 @@
     const data = await call("adminData", { token: state.token })
     $("stat-members").textContent = String(data.memberCount || 0)
     renderConsumeItems(data.consumeItems.filter(item => item.status === 1))
-    renderStaffAdmin(data.staff); renderItemAdmin(data.consumeItems); renderNoticeAdmin(data.notices)
+    renderStaffAdmin(data.staff); renderItemAdmin(data.consumeItems); renderNoticeAdmin(data.notices); await loadMembers(true)
     renderAdminRows($("admin-log-list"), data.logs.map(log => {
       const row = el("div", null, "admin-row")
       row.append(el("span", `${log.type === "recharge" ? "充值" : log.type === "settlement" ? "消费" : "冲正"} ${yuan(log.amount)} · ${new Date(log.createTime).toLocaleString()}`))
@@ -212,6 +229,7 @@
   $("logout").addEventListener("click", () => { clearSession(); showApp() })
   $("refresh-appointments").addEventListener("click", loadAppointments)
   $("appointment-status").addEventListener("change", loadAppointments)
+  $("load-more-members").addEventListener("click", () => submitting($("load-more-members"), () => loadMembers()))
   $("new-member").addEventListener("click", () => { $("member-create").classList.remove("hidden"); $("member-name").focus() })
   $("cancel-member").addEventListener("click", () => { $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = "" })
   $("save-member").addEventListener("click", () => submitting($("save-member"), async () => { try { const data = await call("staffSaveMember", { token: state.token, name: $("member-name").value.trim(), mobile: $("member-mobile").value.trim() }); $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = ""; $("mobile").value = data.mobile; renderMember(await call("staffSearch", { token: state.token, mobile: data.mobile })); message("会员已建档，可继续充值、结算与新增服务记录") } catch (error) { message(error.message, "error") } }))

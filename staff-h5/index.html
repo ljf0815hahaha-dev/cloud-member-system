@@ -7,6 +7,7 @@
   <meta name="color-scheme" content="light">
   <title>ESCAPE车房 · 门店工作台</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./responsive.css">
 </head>
 <body>
 <div id="app" class="app-shell">
@@ -67,7 +68,7 @@
       </div>
       <div class="panel action-panel hidden" data-panel="admin">
         <div class="action-header"><div><div class="eyebrow">MANAGER CENTER</div><h2>店长管理</h2></div><span class="status-dot">仅店长可操作</span></div>
-        <div class="admin-grid"><div><h3>员工管理</h3><div id="staff-list" class="admin-list"></div><label>账号<input id="new-staff-account"></label><label>姓名<input id="new-staff-name"></label><label>初始密码<input id="new-staff-password" type="password" placeholder="至少6位"></label><label>角色<select id="new-staff-role"><option value="staff">店员</option><option value="admin">店长</option></select></label><button id="add-staff" class="primary">新增员工</button></div><div><h3>消费项目</h3><div id="consume-items-list" class="admin-list"></div><div class="inline"><input id="new-consume-item" placeholder="新增项目"><input id="new-consume-price" type="number" min="0" step="0.01" placeholder="参考价（元）"><button id="add-consume-item" class="primary compact">添加</button></div></div><div><h3>公告</h3><div id="notice-list" class="admin-list"></div><label>公告标题<input id="new-notice-title" placeholder="公告标题"></label><label>公告图片<input id="new-notice-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div id="new-notice-preview" class="image-preview"></div><button id="add-notice" class="primary compact">添加公告</button></div><div><h3>最近流水</h3><div id="admin-log-list" class="admin-list"></div></div></div>
+        <div class="admin-grid"><div><h3>会员总览</h3><p class="panel-note" id="member-overview-summary">正在加载会员…</p><div id="member-overview-list" class="admin-list member-overview-list"></div><button id="load-more-members" class="ghost compact hidden">加载更多会员</button></div><div><h3>员工管理</h3><div id="staff-list" class="admin-list"></div><label>账号<input id="new-staff-account"></label><label>姓名<input id="new-staff-name"></label><label>初始密码<input id="new-staff-password" type="password" placeholder="至少6位"></label><label>角色<select id="new-staff-role"><option value="staff">店员</option><option value="admin">店长</option></select></label><button id="add-staff" class="primary">新增员工</button></div><div><h3>消费项目</h3><div id="consume-items-list" class="admin-list"></div><div class="inline"><input id="new-consume-item" placeholder="新增项目"><input id="new-consume-price" type="number" min="0" step="0.01" placeholder="参考价（元）"><button id="add-consume-item" class="primary compact">添加</button></div></div><div><h3>公告</h3><div id="notice-list" class="admin-list"></div><label>公告标题<input id="new-notice-title" placeholder="公告标题"></label><label>公告图片<input id="new-notice-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div id="new-notice-preview" class="image-preview"></div><button id="add-notice" class="primary compact">添加公告</button></div><div><h3>最近流水</h3><div id="admin-log-list" class="admin-list"></div></div></div>
       </div>
       <div id="action-message" class="message"></div>
     </section>

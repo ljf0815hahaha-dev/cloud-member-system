@@ -53,6 +53,7 @@
     "staffLogin",
     "sessionValidate",
     "staffSearch",
+    "staffMembers",
     "staffSaveMember",
     "staffAppointments",
     "getConsumeItems",
@@ -78,6 +79,7 @@
     "authRequired": [
       "sessionValidate",
       "staffSearch",
+      "staffMembers",
       "staffSaveMember",
       "staffAppointments",
       "getConsumeItems",
