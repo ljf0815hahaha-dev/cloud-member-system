@@ -52,7 +52,7 @@
     const main = el("div", null, "member-main"), info = el("div"), name = el("div", state.member.name || "会员", "member-name"), mobile = el("div", state.member.mobile, "member-mobile")
     info.append(name, mobile); main.append(info, el("div", yuan(state.member.balance), "member-balance"))
     const logs = el("div"); renderLogs(logs, data.recentLogs || [])
-    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); renderVehicles(); updateSettlementPreview(); loadWorkOrders().catch(error => { $("work-order-list").replaceChildren(el("div", error.message, "error")) })
+    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); $("active-member-name").textContent = state.member.name || "会员"; $("active-member-meta").textContent = `${state.member.mobile} · 余额 ${yuan(state.member.balance)}`; $("active-member-context").classList.remove("hidden"); renderVehicles(); updateSettlementPreview(); loadWorkOrders().catch(error => { $("work-order-list").replaceChildren(el("div", error.message, "error")) })
   }
   function clearVehicleForm() { $("vehicle-id").value = ""; $("vehicle-version").value = "0"; $("vehicle-plate").value = ""; $("vehicle-brand").value = ""; $("vehicle-model").value = ""; $("vehicle-color").value = ""; $("vehicle-vin").value = ""; $("vehicle-default").checked = false }
   function renderVehicles() {
@@ -140,7 +140,7 @@
     const target = $("member-overview-list")
     target.replaceChildren(...(state.members.length ? state.members.map(member => {
       const row = el("div", null, "member-overview-row"), info = el("div"), name = el("strong", member.name || "会员"), detail = el("span", `${member.mobile} · 余额 ${yuan(member.balance)}`), button = el("button", "查看", "ghost")
-      button.addEventListener("click", async () => { $("mobile").value = member.mobile; try { renderMember(await call("staffSearch", { token: state.token, mobile: member.mobile })); $("actions").scrollIntoView({ behavior: "smooth", block: "start" }) } catch (error) { message(error.message, "error") } })
+      button.addEventListener("click", async () => { $("mobile").value = member.mobile; try { renderMember(await call("staffSearch", { token: state.token, mobile: member.mobile })); await activateTab("vehicles"); $("member-card").scrollIntoView({ behavior: "smooth", block: "start" }) } catch (error) { message(error.message, "error") } })
       info.append(name, detail); row.append(info, button); return row
     }) : [el("div", "暂无会员", "log")]))
     $("member-overview-summary").textContent = `已展示 ${state.members.length} / ${state.memberTotal} 位会员`
@@ -231,6 +231,12 @@
       message(`会员总览加载失败：${error.message}`, "error")
     }
   }
+  async function activateTab(tabName) {
+    document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item.dataset.tab === tabName))
+    document.querySelectorAll(".action-panel").forEach(panel => panel.classList.toggle("hidden", panel.dataset.panel !== tabName))
+    message("")
+    if (tabName === "admin") await loadAdmin()
+  }
   async function uploadWorkOrderImages(files, stage) {
     const valid = validateImages(files)
     if (config.devMode) return window.MockStaffService.upload(valid, state.member.id)
@@ -280,6 +286,7 @@
   $("refresh-appointments").addEventListener("click", loadAppointments)
   $("appointment-status").addEventListener("change", loadAppointments)
   $("admin-shortcut").addEventListener("click", event => { event.preventDefault(); openAdminPanel() })
+  $("return-member-overview").addEventListener("click", async () => { state.member = null; state.vehicles = []; $("member-card").classList.add("hidden"); $("active-member-context").classList.add("hidden"); await openAdminPanel() })
   $("load-more-members").addEventListener("click", () => submitting($("load-more-members"), () => loadMembers()))
   $("work-order-before").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("work-order-before-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "施工前照片预览"; return image })) } catch (error) { event.target.value = ""; $("work-order-before-preview").replaceChildren(); message(error.message, "error") } })
   $("create-work-order").addEventListener("click", () => submitting($("create-work-order"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const beforeImages = await uploadWorkOrderImages($("work-order-before").files, "before"); await call("staffWorkOrders", { token: state.token, action: "create", userId: state.member.id, vehicleId: $("work-order-vehicle").value, serviceName: $("work-order-service").value.trim(), assignedStaffId: $("work-order-staff").value, expectedDeliveryAt: $("work-order-delivery").value, beforeImages, remark: $("work-order-remark").value.trim() }); $("work-order-service").value = ""; $("work-order-delivery").value = ""; $("work-order-before").value = ""; $("work-order-before-preview").replaceChildren(); $("work-order-remark").value = ""; await loadWorkOrders(); message("施工工单已创建") } catch (error) { message(error.message, "error") } }))
@@ -287,7 +294,7 @@
   $("cancel-member").addEventListener("click", () => { $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = "" })
   $("save-member").addEventListener("click", () => submitting($("save-member"), async () => { try { const data = await call("staffSaveMember", { token: state.token, name: $("member-name").value.trim(), mobile: $("member-mobile").value.trim() }); $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = ""; $("mobile").value = data.mobile; renderMember(await call("staffSearch", { token: state.token, mobile: data.mobile })); message("会员已建档，可继续充值、结算与新增服务记录") } catch (error) { message(error.message, "error") } }))
   $("search").addEventListener("click", async () => { setSearchError(); try { renderMember(await call("staffSearch", { token: state.token, mobile: $("mobile").value.trim() })) } catch (error) { setSearchError(error.message); if (error.message.includes("过期") || error.message.includes("不可用")) $("logout").click() } })
-  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", async () => { document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item === tab)); document.querySelectorAll(".action-panel").forEach(panel => panel.classList.toggle("hidden", panel.dataset.panel !== tab.dataset.tab)); message(""); if (tab.dataset.tab === "admin") try { await loadAdmin() } catch (error) { message(error.message, "error") } }))
+  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", async () => { try { await activateTab(tab.dataset.tab) } catch (error) { message(error.message, "error") } }))
   $("film-images").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("image-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "待上传照片"; return image })) } catch (error) { event.target.value = ""; $("image-preview").replaceChildren(); message(error.message, "error") } })
   $("settle-amount").addEventListener("input", updateSettlementPreview)
   $("consume-item").addEventListener("change", () => { const option = $("consume-item").selectedOptions[0], priceFen = Number(option && option.dataset.priceFen); if (Number.isSafeInteger(priceFen) && priceFen > 0 && !$("settle-amount").value) { $("settle-amount").value = (priceFen / 100).toFixed(2); updateSettlementPreview() } })

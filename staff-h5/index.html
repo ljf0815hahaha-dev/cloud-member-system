@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./responsive.css?v=20260817-2">
   <link rel="stylesheet" href="./work-orders.css?v=20260817-2">
   <link rel="stylesheet" href="./admin-shortcut.css?v=20260817-3">
+  <link rel="stylesheet" href="./member-focus.css?v=20260817-6">
 </head>
 <body>
 <div id="app" class="app-shell">
@@ -45,7 +46,7 @@
        <div id="search-error" class="error"></div><div class="inline member-tools"><button id="new-member" class="ghost">新建会员</button></div><div id="member-create" class="member-create hidden"><div class="form-grid"><label>会员称呼<input id="member-name" maxlength="40" autocomplete="name" placeholder="例如：张先生"></label><label>手机号<input id="member-mobile" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="请输入手机号"></label></div><div class="inline"><button id="save-member" class="primary compact">保存会员</button><button id="cancel-member" class="ghost">取消</button></div></div><div id="member-card" class="member-card hidden"></div>
     </section>
 
-    <section id="actions" class="actions hidden">
+    <section id="actions" class="actions hidden"><div id="active-member-context" class="active-member-context hidden"><div><span>当前操作会员</span><strong id="active-member-name"></strong><small id="active-member-meta"></small></div><button id="return-member-overview" class="ghost">返回会员总览</button></div>
       <nav class="tabs"><button class="tab active" data-tab="recharge">余额充值</button><button class="tab" data-tab="settle">消费结算</button><button class="tab" data-tab="vehicles">车辆档案</button><button class="tab" data-tab="film">贴膜档案</button><button class="tab" data-tab="workorder">施工工单</button><button id="admin-tab" class="tab hidden" data-tab="admin">店长管理</button></nav>
       <div class="panel action-panel" data-panel="recharge">
         <div class="action-header"><div><div class="eyebrow">BALANCE RECHARGE</div><h2>会员充值</h2></div><span class="status-dot">线下确认收款后录入</span></div>
@@ -86,6 +87,6 @@
 <script src="./config.js?v=20260817-2" charset="UTF-8"></script>
 <script src="./mock-service.js?v=20260817-2" charset="UTF-8"></script>
 <script src="https://static.cloudbase.net/cloudbase-js-sdk/2.27.1/cloudbase.full.js"></script>
-<script src="./app.js?v=20260817-5" charset="UTF-8"></script>
+<script src="./app.js?v=20260817-6" charset="UTF-8"></script>
 </body>
 </html>
