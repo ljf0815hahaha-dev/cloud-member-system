@@ -33,6 +33,11 @@ exports.main = async event => {
     return { code: 0, data: { userId: result._id, mobile } }
   } catch (error) {
     console.error("member login failed", error)
-    return { code: 500, message: "手机号授权失败，请稍后重试" }
+    const rawMessage = String(error?.errMsg || error?.message || "")
+    const errorCode = String(error?.errCode || error?.code || "UNKNOWN")
+    if (/permission|unauthorized|access denied/i.test(rawMessage)) {
+      return { code: 403, message: `手机号授权接口权限不足（${errorCode}），请由小程序管理员开通手机号授权能力` }
+    }
+    return { code: 500, message: `手机号授权失败（${errorCode}），请稍后重试` }
   }
 }
