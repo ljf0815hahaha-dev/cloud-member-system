@@ -5,7 +5,8 @@
     "pages/logs/logs",
     "pages/films/films",
     "pages/vehicles/vehicles",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/staff-webview/staff-webview"
   ],
   "window": {
     "navigationBarTitleText": "ESCAPE车房",

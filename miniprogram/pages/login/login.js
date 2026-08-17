@@ -3,6 +3,7 @@ const { call } = require("../../utils/cloud")
 Page({
   data: { devMode: true },
   onLoad() { this.setData({ devMode: getApp().globalData.devMode }) },
+  goStaffLogin() { wx.navigateTo({ url: "/pages/staff-webview/staff-webview" }) },
   async mockLogin() {
     await call("memberLogin", { phoneCode: "mock" })
     wx.showToast({ title: "演示登录成功" })
