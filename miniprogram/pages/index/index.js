@@ -34,13 +34,20 @@ Page({
   goLogs() { wx.navigateTo({ url: "/pages/logs/logs" }) },
   goFilms() { wx.navigateTo({ url: "/pages/films/films" }) },
   goVehicles() { wx.navigateTo({ url: "/pages/vehicles/vehicles" }) },
-  callStore(event) {
-    wx.makePhoneCall({ phoneNumber: event.currentTarget.dataset.phone })
+  navigateStore() {
+    wx.openLocation({
+      latitude: 32.0862655,
+      longitude: 118.7504826,
+      name: "ESCAPE车房",
+      address: "南京市鼓楼区挹江门街道洪庙一巷8号红五月硅巷5栋102",
+      scale: 18
+    })
   },
-  copyAddress() {
-    wx.setClipboardData({
-      data: "南京市鼓楼区挹江门街道洪庙一巷8号红五月硅巷5栋102",
-      success: () => wx.showToast({ title: "地址已复制", icon: "success" })
+  chooseStorePhone() {
+    const phones = ["13851698489", "18502543184"]
+    wx.showActionSheet({
+      itemList: phones,
+      success: ({ tapIndex }) => wx.makePhoneCall({ phoneNumber: phones[tapIndex] })
     })
   }
 })
