@@ -6,6 +6,7 @@
     "pages/films/films",
     "pages/vehicles/vehicles",
     "pages/login/login",
+    "pages/privacy/privacy",
     "pages/staff-webview/staff-webview"
   ],
   "window": {
@@ -15,5 +16,8 @@
     "backgroundColor": "#f2f0eb"
   },
   "style": "v2",
+  "requiredPrivateInfos": [
+    "getPhoneNumber"
+  ],
   "sitemapLocation": "sitemap.json"
 }
