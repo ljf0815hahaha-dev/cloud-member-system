@@ -33,5 +33,14 @@ Page({
   },
   goLogs() { wx.navigateTo({ url: "/pages/logs/logs" }) },
   goFilms() { wx.navigateTo({ url: "/pages/films/films" }) },
-  goVehicles() { wx.navigateTo({ url: "/pages/vehicles/vehicles" }) }
+  goVehicles() { wx.navigateTo({ url: "/pages/vehicles/vehicles" }) },
+  callStore(event) {
+    wx.makePhoneCall({ phoneNumber: event.currentTarget.dataset.phone })
+  },
+  copyAddress() {
+    wx.setClipboardData({
+      data: "南京市鼓楼区挹江门街道洪庙一巷8号红五月硅巷5栋102",
+      success: () => wx.showToast({ title: "地址已复制", icon: "success" })
+    })
+  }
 })
