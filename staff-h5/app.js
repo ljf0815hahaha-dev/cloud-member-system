@@ -220,6 +220,17 @@
     if (config.devMode) return window.MockStaffService.upload(valid, state.member.id)
     return Promise.all(valid.map((file, index) => state.app.uploadFile({ cloudPath: `film-records/${state.member.id}/${Date.now()}-${index}-${file.name}`, filePath: file }).then(res => res.fileID)))
   }
+  async function openAdminPanel() {
+    if (!state.staff || state.staff.role !== "admin") { message("当前账号没有店长权限", "error"); return }
+    document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item.dataset.tab === "admin"))
+    document.querySelectorAll(".action-panel").forEach(panel => panel.classList.toggle("hidden", panel.dataset.panel !== "admin"))
+    try {
+      await loadAdmin()
+      document.querySelector('[data-panel="admin"]').scrollIntoView({ behavior: "smooth", block: "start" })
+    } catch (error) {
+      message(`会员总览加载失败：${error.message}`, "error")
+    }
+  }
   async function uploadWorkOrderImages(files, stage) {
     const valid = validateImages(files)
     if (config.devMode) return window.MockStaffService.upload(valid, state.member.id)
@@ -268,7 +279,7 @@
   $("logout").addEventListener("click", () => { clearSession(); showApp() })
   $("refresh-appointments").addEventListener("click", loadAppointments)
   $("appointment-status").addEventListener("change", loadAppointments)
-  $("admin-shortcut").addEventListener("click", () => { $("admin-tab").click(); $("admin-tab").scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }) })
+  $("admin-shortcut").addEventListener("click", event => { event.preventDefault(); openAdminPanel() })
   $("load-more-members").addEventListener("click", () => submitting($("load-more-members"), () => loadMembers()))
   $("work-order-before").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("work-order-before-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "施工前照片预览"; return image })) } catch (error) { event.target.value = ""; $("work-order-before-preview").replaceChildren(); message(error.message, "error") } })
   $("create-work-order").addEventListener("click", () => submitting($("create-work-order"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const beforeImages = await uploadWorkOrderImages($("work-order-before").files, "before"); await call("staffWorkOrders", { token: state.token, action: "create", userId: state.member.id, vehicleId: $("work-order-vehicle").value, serviceName: $("work-order-service").value.trim(), assignedStaffId: $("work-order-staff").value, expectedDeliveryAt: $("work-order-delivery").value, beforeImages, remark: $("work-order-remark").value.trim() }); $("work-order-service").value = ""; $("work-order-delivery").value = ""; $("work-order-before").value = ""; $("work-order-before-preview").replaceChildren(); $("work-order-remark").value = ""; await loadWorkOrders(); message("施工工单已创建") } catch (error) { message(error.message, "error") } }))
