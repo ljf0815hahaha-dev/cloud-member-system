@@ -23,6 +23,7 @@
     { "name": "staffListVehicles", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "staffSaveVehicle", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "staffAddFilm", "runtime": "Nodejs20.19", "handler": "index.main" },
+    { "name": "staffWorkOrders", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "adminData", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "adminAddStaff", "runtime": "Nodejs20.19", "handler": "index.main" },
     { "name": "adminUpdateStaff", "runtime": "Nodejs20.19", "handler": "index.main" },

@@ -40,6 +40,7 @@
     "staff",
     "staff_sessions",
     "consume_items"
+    ,"work_orders"
   ],
   "cloudFunctions": [
     "memberLogin",
@@ -62,6 +63,7 @@
     "staffListVehicles",
     "staffSaveVehicle",
     "staffAddFilm",
+    "staffWorkOrders",
     "adminData",
     "adminAddStaff",
     "adminUpdateStaff",
@@ -88,6 +90,7 @@
       "staffListVehicles",
       "staffSaveVehicle",
       "staffAddFilm",
+      "staffWorkOrders",
       "adminData",
       "adminAddStaff",
       "adminUpdateStaff",

@@ -3,7 +3,7 @@
   const cachedSession = JSON.parse(localStorage.getItem("staff_session") || "null")
   const cachedProfile = JSON.parse(localStorage.getItem("staff_profile") || "null")
   const validCachedSession = cachedSession && cachedProfile && Number(cachedSession.expireAt) > Date.now()
-  const state = { app: null, token: validCachedSession ? cachedSession.token : "", staff: validCachedSession ? cachedProfile : null, member: null, consumeItems: [], vehicles: [], members: [], memberOffset: 0, memberTotal: 0, memberHasMore: false }
+  const state = { app: null, token: validCachedSession ? cachedSession.token : "", staff: validCachedSession ? cachedProfile : null, member: null, consumeItems: [], vehicles: [], members: [], memberOffset: 0, memberTotal: 0, memberHasMore: false, workOrders: [], staffOptions: [] }
   const $ = id => document.getElementById(id)
   const fen = value => { const text = String(value).trim(); return /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(text) ? Math.round(Number(text) * 100) : NaN }
   const yuan = value => `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -51,7 +51,7 @@
     const main = el("div", null, "member-main"), info = el("div"), name = el("div", state.member.name || "会员", "member-name"), mobile = el("div", state.member.mobile, "member-mobile")
     info.append(name, mobile); main.append(info, el("div", yuan(state.member.balance), "member-balance"))
     const logs = el("div"); renderLogs(logs, data.recentLogs || [])
-    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); renderVehicles(); updateSettlementPreview()
+    $("member-card").replaceChildren(main, logs); $("member-card").classList.remove("hidden"); $("actions").classList.remove("hidden"); renderVehicles(); updateSettlementPreview(); loadWorkOrders().catch(error => { $("work-order-list").replaceChildren(el("div", error.message, "error")) })
   }
   function clearVehicleForm() { $("vehicle-id").value = ""; $("vehicle-version").value = "0"; $("vehicle-plate").value = ""; $("vehicle-brand").value = ""; $("vehicle-model").value = ""; $("vehicle-color").value = ""; $("vehicle-vin").value = ""; $("vehicle-default").checked = false }
   function renderVehicles() {
@@ -63,7 +63,40 @@
       actions.append(edit, disable); row.append(info, actions); return row
     })
     $("vehicle-list").replaceChildren(...(rows.length ? rows : [el("div", "暂无车辆档案", "log")]))
-    $("film-vehicle").replaceChildren(...state.vehicles.filter(item => item.status === 1).map(vehicle => { const option = el("option", `${vehicle.plateNumber} ${vehicle.brand || ""} ${vehicle.model || ""}`); option.value = vehicle.id; option.selected = Boolean(vehicle.isDefault); return option }))
+    const activeVehicles = state.vehicles.filter(item => item.status === 1)
+    const vehicleOptions = activeVehicles.map(vehicle => { const option = el("option", `${vehicle.plateNumber} ${vehicle.brand || ""} ${vehicle.model || ""}`); option.value = vehicle.id; option.selected = Boolean(vehicle.isDefault); return option })
+    $("film-vehicle").replaceChildren(...vehicleOptions)
+    $("work-order-vehicle").replaceChildren(...activeVehicles.map(vehicle => { const option = el("option", `${vehicle.plateNumber} ${vehicle.brand || ""} ${vehicle.model || ""}`); option.value = vehicle.id; option.selected = Boolean(vehicle.isDefault); return option }))
+  }
+  function statusText(status) { return ({ pending: "待施工", inProgress: "施工中", completed: "待签收" })[status] || status }
+  function renderWorkOrders(orders) {
+    state.workOrders = orders
+    const target = $("work-order-list")
+    if (!orders.length) { target.replaceChildren(el("div", "该会员暂无施工工单", "log")); return }
+    target.replaceChildren(...orders.map(order => {
+      const row = el("article", null, "work-order-row"), head = el("div", null, "work-order-head"), title = el("strong", order.serviceName), status = el("span", statusText(order.status), `work-order-status ${order.status}`), meta = el("div", `车辆：${order.vehicleSnapshot?.plateNumber || "未登记"} · 施工：${order.assignedStaffName || "未分配"}\n预计交车：${String(order.expectedDeliveryAt || "").replace("T", " ")}\n前图 ${order.beforeImages?.length || 0} 张 · 后图 ${order.afterImages?.length || 0} 张`, "work-order-meta"), actions = el("div", null, "work-order-actions")
+      head.append(title, status); row.append(head, meta)
+      if (order.status === "pending") actions.append(actionButton("开始施工", async () => { await call("staffWorkOrders", { token: state.token, action: "start", orderId: order.id }); await loadWorkOrders(); message("工单已开始施工") }))
+      if (["pending", "inProgress"].includes(order.status)) {
+        const files = document.createElement("input"); files.type = "file"; files.accept = "image/jpeg,image/png,image/webp"; files.multiple = true; files.title = "上传施工后照片"
+        actions.append(files, actionButton("上传后图并完工", async () => { const afterImages = await uploadWorkOrderImages(files.files, "after"); await call("staffWorkOrders", { token: state.token, action: "complete", orderId: order.id, afterImages }); await loadWorkOrders(); message("施工已完工，等待顾客签收") }))
+      }
+      if (order.status === "completed" && !order.signedAt) {
+        const signer = field("", "text"); signer.placeholder = "顾客签收姓名"; signer.maxLength = 40
+        actions.append(signer, actionButton("确认顾客签收", async () => { await call("staffWorkOrders", { token: state.token, action: "sign", orderId: order.id, signerName: signer.value }); await loadWorkOrders(); message("顾客签收已记录") }))
+      }
+      if (order.signedAt) row.append(el("div", `已由 ${order.signerName} 签收 · ${new Date(order.signedAt).toLocaleString()}`, "work-order-signed"))
+      if (actions.childElementCount) row.append(actions)
+      return row
+    }))
+  }
+  async function loadWorkOrders() {
+    if (!state.member) return
+    renderWorkOrders(await call("staffWorkOrders", { token: state.token, action: "list", userId: state.member.id }))
+  }
+  async function loadWorkOrderStaff() {
+    state.staffOptions = await call("staffWorkOrders", { token: state.token, action: "staffOptions" })
+    $("work-order-staff").replaceChildren(...state.staffOptions.map(item => { const option = el("option", `${item.name} · ${item.role === "admin" ? "店长" : "店员"}`); option.value = item.id; option.selected = item.id === state.staff.id; return option }))
   }
   async function searchCurrentMember() {
     if (!state.member) return
@@ -186,6 +219,11 @@
     if (config.devMode) return window.MockStaffService.upload(valid, state.member.id)
     return Promise.all(valid.map((file, index) => state.app.uploadFile({ cloudPath: `film-records/${state.member.id}/${Date.now()}-${index}-${file.name}`, filePath: file }).then(res => res.fileID)))
   }
+  async function uploadWorkOrderImages(files, stage) {
+    const valid = validateImages(files)
+    if (config.devMode) return window.MockStaffService.upload(valid, state.member.id)
+    return Promise.all(valid.map((file, index) => state.app.uploadFile({ cloudPath: `work-orders/${state.member.id}/${Date.now()}-${stage}-${index}-${file.name}`, filePath: file }).then(res => res.fileID)))
+  }
   function validateNoticeImage(files) {
     const file = files && files[0], types = ["image/jpeg", "image/png", "image/webp"]
     if (!file) throw new Error("请选择公告图片")
@@ -201,7 +239,7 @@
     return state.app.uploadFile({ cloudPath: `notices/${Date.now()}-${random}.${suffix}`, filePath: file }).then(res => res.fileID)
   }
   async function activateSession(profile) {
-    state.staff = profile; showApp(); await Promise.all([loadConsumeItems(), refreshOverview(), loadAppointments()])
+    state.staff = profile; showApp(); await Promise.all([loadConsumeItems(), loadWorkOrderStaff(), refreshOverview(), loadAppointments()])
   }
   async function boot() {
     $("mode-value").textContent = config.devMode ? "本地演示" : "云端正式"
@@ -230,6 +268,8 @@
   $("refresh-appointments").addEventListener("click", loadAppointments)
   $("appointment-status").addEventListener("change", loadAppointments)
   $("load-more-members").addEventListener("click", () => submitting($("load-more-members"), () => loadMembers()))
+  $("work-order-before").addEventListener("change", event => { try { const files = validateImages(event.target.files); $("work-order-before-preview").replaceChildren(...files.map(file => { const image = document.createElement("img"); image.src = URL.createObjectURL(file); image.alt = "施工前照片预览"; return image })) } catch (error) { event.target.value = ""; $("work-order-before-preview").replaceChildren(); message(error.message, "error") } })
+  $("create-work-order").addEventListener("click", () => submitting($("create-work-order"), async () => { try { if (!state.member) throw new Error("请先查询会员"); const beforeImages = await uploadWorkOrderImages($("work-order-before").files, "before"); await call("staffWorkOrders", { token: state.token, action: "create", userId: state.member.id, vehicleId: $("work-order-vehicle").value, serviceName: $("work-order-service").value.trim(), assignedStaffId: $("work-order-staff").value, expectedDeliveryAt: $("work-order-delivery").value, beforeImages, remark: $("work-order-remark").value.trim() }); $("work-order-service").value = ""; $("work-order-delivery").value = ""; $("work-order-before").value = ""; $("work-order-before-preview").replaceChildren(); $("work-order-remark").value = ""; await loadWorkOrders(); message("施工工单已创建") } catch (error) { message(error.message, "error") } }))
   $("new-member").addEventListener("click", () => { $("member-create").classList.remove("hidden"); $("member-name").focus() })
   $("cancel-member").addEventListener("click", () => { $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = "" })
   $("save-member").addEventListener("click", () => submitting($("save-member"), async () => { try { const data = await call("staffSaveMember", { token: state.token, name: $("member-name").value.trim(), mobile: $("member-mobile").value.trim() }); $("member-create").classList.add("hidden"); $("member-name").value = ""; $("member-mobile").value = ""; $("mobile").value = data.mobile; renderMember(await call("staffSearch", { token: state.token, mobile: data.mobile })); message("会员已建档，可继续充值、结算与新增服务记录") } catch (error) { message(error.message, "error") } }))

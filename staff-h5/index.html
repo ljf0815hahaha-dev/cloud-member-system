@@ -8,6 +8,7 @@
   <title>ESCAPE车房 · 门店工作台</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./work-orders.css">
 </head>
 <body>
 <div id="app" class="app-shell">
@@ -44,7 +45,7 @@
     </section>
 
     <section id="actions" class="actions hidden">
-      <nav class="tabs"><button class="tab active" data-tab="recharge">余额充值</button><button class="tab" data-tab="settle">消费结算</button><button class="tab" data-tab="vehicles">车辆档案</button><button class="tab" data-tab="film">贴膜档案</button><button id="admin-tab" class="tab hidden" data-tab="admin">店长管理</button></nav>
+      <nav class="tabs"><button class="tab active" data-tab="recharge">余额充值</button><button class="tab" data-tab="settle">消费结算</button><button class="tab" data-tab="vehicles">车辆档案</button><button class="tab" data-tab="film">贴膜档案</button><button class="tab" data-tab="workorder">施工工单</button><button id="admin-tab" class="tab hidden" data-tab="admin">店长管理</button></nav>
       <div class="panel action-panel" data-panel="recharge">
         <div class="action-header"><div><div class="eyebrow">BALANCE RECHARGE</div><h2>会员充值</h2></div><span class="status-dot">线下确认收款后录入</span></div>
         <div class="form-grid"><label>充值金额（元）<input id="recharge-amount" inputmode="decimal" placeholder="例如 500"></label><label>收款方式<select id="recharge-method"><option value="wechat">微信</option><option value="alipay">支付宝</option><option value="cash">现金</option></select></label><label class="wide">备注（选填）<input id="recharge-remark" maxlength="100" placeholder="例如：会员储值"></label></div><button id="recharge" class="primary action-button">确认充值</button>
@@ -65,6 +66,13 @@
         <div class="form-grid"><label>服务车辆<select id="film-vehicle"></select></label><label>服务日期<input id="film-service-date" type="date"></label><label>贴膜类别<select id="film-category"><option value="window">玻璃膜</option><option value="ppf">漆面保护膜</option><option value="colorChange">改色膜</option><option value="other">其他</option></select></label><label>膜品牌<input id="film-brand" maxlength="50"></label><label>膜系列<input id="film-series" maxlength="50"></label><label>膜型号<input id="film-model" maxlength="50"></label><label>质保（月）<input id="film-warranty" inputmode="numeric" value="0"></label><label>施工里程（km）<input id="film-mileage" inputmode="numeric" value="0"></label></div>
         <label>施工位置</label><div id="film-positions" class="check-grid"><label><input type="checkbox" value="frontWindshield">前挡</label><label><input type="checkbox" value="rearWindshield">后挡</label><label><input type="checkbox" value="leftFront">左前窗</label><label><input type="checkbox" value="rightFront">右前窗</label><label><input type="checkbox" value="leftRear">左后窗</label><label><input type="checkbox" value="rightRear">右后窗</label><label><input type="checkbox" value="sunroof">天窗</label><label><input type="checkbox" value="fullBody">全车</label><label><input type="checkbox" value="partialBody">局部车身</label><label><input type="checkbox" value="other">其他</label></div>
         <label>服务照片（1-9张）<input id="film-images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="image-preview" class="image-preview"></div><label>服务备注<textarea id="film-remark" maxlength="200" placeholder="施工说明与注意事项"></textarea></label><button id="add-film" class="primary action-button">保存贴膜记录</button>
+      </div>
+      <div class="panel action-panel hidden" data-panel="workorder">
+        <div class="action-header"><div><div class="eyebrow">SERVICE WORK ORDER</div><h2>施工工单</h2></div><span class="status-dot">施工前后均留档</span></div>
+        <div id="work-order-member-hint" class="calculation">请先在上方查询会员，再创建施工工单。</div>
+        <div class="form-grid"><label>服务车辆<select id="work-order-vehicle"></select></label><label>服务项目<input id="work-order-service" maxlength="50" placeholder="例如：全车改色膜施工"></label><label>施工人员<select id="work-order-staff"></select></label><label>预计交车时间<input id="work-order-delivery" type="datetime-local"></label></div>
+        <label>施工前照片（1-9张）<input id="work-order-before" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="work-order-before-preview" class="image-preview"></div><label>施工备注<textarea id="work-order-remark" maxlength="300" placeholder="施工项目、客户要求与注意事项"></textarea></label><button id="create-work-order" class="primary action-button">创建施工工单</button>
+        <div class="work-order-divider"></div><div id="work-order-list" class="work-order-list"><div class="log">查询会员后显示该车辆的施工工单</div></div>
       </div>
       <div class="panel action-panel hidden" data-panel="admin">
         <div class="action-header"><div><div class="eyebrow">MANAGER CENTER</div><h2>店长管理</h2></div><span class="status-dot">仅店长可操作</span></div>
