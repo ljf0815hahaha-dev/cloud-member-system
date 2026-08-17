@@ -193,7 +193,8 @@
     if (!validCachedSession) clearSession()
     if (!config.devMode) {
       if (!config.envId || config.envId === "YOUR_CLOUDBASE_ENV_ID") { setLoginError("请先在 config.js 配置 CloudBase 环境 ID"); showApp(); return }
-      state.app = cloudbase.init({ env: config.envId })
+      if (typeof cloudbase === "undefined" || typeof cloudbase.init !== "function") { setLoginError("CloudBase SDK 加载失败，请刷新页面后重试"); showApp(); return }
+      state.app = cloudbase.init({ env: config.envId, region: "ap-shanghai" })
       try { await state.app.auth().signInAnonymously() } catch (error) { console.warn("anonymous auth unavailable", error) }
     }
     showApp()
