@@ -5,3 +5,6 @@ page { background: #f2f0eb; color: #111111; font-family: -apple-system, BlinkMac
 .button-primary::after { border: 0; }
 .muted { color: #5d5a54; font-size: 26rpx; }
 .empty { color: #5d5a54; text-align: center; padding: 80rpx 20rpx; }
+.structured view { margin: 0; padding: 12rpx 0; border-bottom: 1rpx solid #d4d0c8; line-height: 1.55; }
+.structured view:last-child { border-bottom: 0; }
+.structured text { width: 148rpx; font-weight: 800; }

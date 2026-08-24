@@ -8,5 +8,5 @@ exports.main = async event => {
   if (!user) return { code: 401, message: "请先完成手机号登录" }
   const limit = Math.min(Math.max(Number(event.limit) || 30, 1), 50)
   const records = await db.collection("film_records").where({ userId: user._id }).orderBy("createTime", "desc").limit(limit).get()
-  return { code: 0, data: records.data.filter(item => item.status == null || item.status === 1).map(item => ({ schemaVersion: 1, status: 1, vehicleSnapshot: null, serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item })) }
+  return { code: 0, data: records.data.filter(item => item.status == null || item.status === 1).map(item => ({ schemaVersion: 1, status: 1, memberSnapshot: null, vehicleSnapshot: null, constructionStore: "", constructionPriceFen: 0, productType: "", rollNumber: "", serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item })) }
 }

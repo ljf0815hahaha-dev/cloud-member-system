@@ -39,7 +39,7 @@ function call(name) {
   if (!session || session.memberId !== data.member.id) return Promise.reject(new Error("请先完成手机号登录"))
   if (name === "memberData") return Promise.resolve(data.member)
   if (name === "getLogs") return Promise.resolve(data.logs.filter(item => item.status === 1))
-  if (name === "getFilms") return Promise.resolve(data.films.map(item => ({ schemaVersion: 1, status: 1, vehicleSnapshot: null, serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item })))
+  if (name === "getFilms") return Promise.resolve(data.films.map(item => ({ schemaVersion: 1, status: 1, memberSnapshot: null, vehicleSnapshot: null, constructionStore: "", constructionPriceFen: 0, productType: "", rollNumber: "", serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item })))
   if (name === "memberVehicles") return Promise.resolve((data.vehicles || []).filter(item => item.status === 1).sort((a, b) => Number(b.isDefault) - Number(a.isDefault)))
   return Promise.reject(new Error(`本地模式暂不支持服务：${name}`))
 }

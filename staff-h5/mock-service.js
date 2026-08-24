@@ -15,7 +15,7 @@
     if (!Array.isArray(data.vehicles)) data.vehicles = []
     if (!Array.isArray(data.workOrders)) data.workOrders = []
     if (!data.operationRequests) data.operationRequests = {}
-    data.films = (data.films || []).map(item => ({ schemaVersion: 1, status: 1, vehicleSnapshot: null, serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item }))
+    data.films = (data.films || []).map(item => ({ schemaVersion: 1, status: 1, memberSnapshot: null, vehicleSnapshot: null, constructionStore: "", constructionPriceFen: 0, productType: "", rollNumber: "", serviceDate: "", filmCategory: "", filmBrand: "", filmSeries: "", filmModel: "", installPosition: [], warrantyMonths: 0, mileageKm: 0, ...item }))
     return data
   }
   function read() { const raw = localStorage.getItem(KEY); const data = migrate(raw ? JSON.parse(raw) : seed()); write(data); return data }
@@ -80,11 +80,14 @@
       write(data); const saved = current || data.vehicles.at(-1); return { id: saved.id, version: saved.version }
     }
     if (name === "staffAddFilm") {
-      const vehicle = data.vehicles.find(item => item.id === input.vehicleId && item.userId === input.userId && item.status === 1), categories = ["window", "ppf", "colorChange", "other"], positions = ["frontWindshield", "rearWindshield", "leftFront", "rightFront", "leftRear", "rightRear", "sunroof", "fullBody", "partialBody", "other"], warrantyMonths = Number(input.warrantyMonths || 0), mileageKm = Number(input.mileageKm || 0)
+      const member = data.members.find(item => item.id === input.userId && item.status === 1), vehicle = data.vehicles.find(item => item.id === input.vehicleId && item.userId === input.userId && item.status === 1), categories = ["window", "ppf", "colorChange", "other"], positions = ["frontWindshield", "rearWindshield", "leftFront", "rightFront", "leftRear", "rightRear", "sunroof", "fullBody", "partialBody", "other"], warrantyMonths = Number(input.warrantyMonths || 0), mileageKm = Number(input.mileageKm || 0)
+      if (!member) throw new Error("会员不存在或已停用")
       if (!vehicle) throw new Error("车辆不存在、已停用或不属于该会员")
       if (!/^\d{4}-\d{2}-\d{2}$/.test(input.serviceDate || "") || !categories.includes(input.filmCategory) || !Array.isArray(input.installPosition) || !input.installPosition.length || input.installPosition.some(item => !positions.includes(item))) throw new Error("请完善服务日期、贴膜类别和施工位置")
       if (!Array.isArray(input.images) || !input.images.length || !Number.isSafeInteger(warrantyMonths) || warrantyMonths < 0 || warrantyMonths > 240 || !Number.isSafeInteger(mileageKm) || mileageKm < 0 || mileageKm > 10000000) throw new Error("贴膜档案参数不正确")
-      data.films.push({ id: id("film"), userId: input.userId, vehicleId: vehicle.id, vehicleSnapshot: { id: vehicle.id, plateNumber: vehicle.plateNumber, brand: vehicle.brand, model: vehicle.model, color: vehicle.color, vin: vehicle.vin }, serviceDate: input.serviceDate, filmCategory: input.filmCategory, filmBrand: input.filmBrand || "", filmSeries: input.filmSeries || "", filmModel: input.filmModel || "", installPosition: [...new Set(input.installPosition)], warrantyMonths, mileageKm, images: input.images, remark: input.remark || "", schemaVersion: 2, status: 1, staffId: staff.id, staffName: staff.name, createTime: new Date().toISOString() }); write(data); return { id: data.films.at(-1).id }
+      const priceFen = Number(input.constructionPriceFen || 0)
+      if (!input.constructionStore || !input.productType || !input.filmBrand || !input.filmModel || !input.rollNumber || !Number.isSafeInteger(priceFen) || priceFen < 0) throw new Error("请完善质保凭证信息")
+      data.films.push({ id: id("film"), userId: input.userId, vehicleId: vehicle.id, memberSnapshot: { name: member.name || "会员", mobile: member.mobile || "" }, vehicleSnapshot: { id: vehicle.id, plateNumber: vehicle.plateNumber, brand: vehicle.brand, model: vehicle.model, color: vehicle.color, vin: vehicle.vin }, constructionStore: input.constructionStore, constructionPriceFen: priceFen, serviceDate: input.serviceDate, filmCategory: input.filmCategory, productType: input.productType, filmBrand: input.filmBrand || "", filmSeries: input.filmSeries || "", filmModel: input.filmModel || "", rollNumber: input.rollNumber, installPosition: [...new Set(input.installPosition)], warrantyMonths, mileageKm, images: input.images, remark: input.remark || "", schemaVersion: 3, status: 1, staffId: staff.id, staffName: staff.name, createTime: new Date().toISOString() }); write(data); return { id: data.films.at(-1).id }
     }
     if (name === "adminData") { ensureStaff(data, input.token, ["admin"]); return { memberCount: data.members.filter(item => item.status === 1).length, staff: data.staff.map(({ password, ...item }) => item), notices: data.notices.slice().sort((a, b) => a.sort - b.sort), consumeItems: data.consumeItems.slice().sort((a, b) => a.sort - b.sort), logs: data.logs.slice().sort((a, b) => new Date(b.createTime) - new Date(a.createTime)).slice(0, 50) } }
     if (name === "adminAddStaff") {

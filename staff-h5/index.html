@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./work-orders.css?v=20260817-2">
   <link rel="stylesheet" href="./admin-shortcut.css?v=20260817-3">
   <link rel="stylesheet" href="./member-focus.css?v=20260817-6">
+  <link rel="stylesheet" href="./film-certificate.css?v=20260824-1">
 </head>
 <body>
 <div id="app" class="app-shell">
@@ -65,9 +66,10 @@
       </div>
       <div class="panel action-panel hidden" data-panel="film">
         <div class="action-header"><div><div class="eyebrow">FILM ARCHIVE</div><h2>新增贴膜档案</h2></div><span class="status-dot">顾客只读不可删除</span></div>
-        <div class="form-grid"><label>服务车辆<select id="film-vehicle"></select></label><label>服务日期<input id="film-service-date" type="date"></label><label>贴膜类别<select id="film-category"><option value="window">玻璃膜</option><option value="ppf">漆面保护膜</option><option value="colorChange">改色膜</option><option value="other">其他</option></select></label><label>膜品牌<input id="film-brand" maxlength="50"></label><label>膜系列<input id="film-series" maxlength="50"></label><label>膜型号<input id="film-model" maxlength="50"></label><label>质保（月）<input id="film-warranty" inputmode="numeric" value="0"></label><label>施工里程（km）<input id="film-mileage" inputmode="numeric" value="0"></label></div>
-        <label>施工位置</label><div id="film-positions" class="check-grid"><label><input type="checkbox" value="frontWindshield">前挡</label><label><input type="checkbox" value="rearWindshield">后挡</label><label><input type="checkbox" value="leftFront">左前窗</label><label><input type="checkbox" value="rightFront">右前窗</label><label><input type="checkbox" value="leftRear">左后窗</label><label><input type="checkbox" value="rightRear">右后窗</label><label><input type="checkbox" value="sunroof">天窗</label><label><input type="checkbox" value="fullBody">全车</label><label><input type="checkbox" value="partialBody">局部车身</label><label><input type="checkbox" value="other">其他</label></div>
-        <label>服务照片（1-9张）<input id="film-images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="image-preview" class="image-preview"></div><label>服务备注<textarea id="film-remark" maxlength="200" placeholder="施工说明与注意事项"></textarea></label><button id="add-film" class="primary action-button">保存贴膜记录</button>
+        <div id="film-certificate-context" class="calculation">请先在上方查询会员并选择服务车辆。</div>
+        <div class="film-form-section"><h3>施工与质保信息</h3><div class="form-grid"><label>服务车辆<select id="film-vehicle"></select></label><label>施工日期<input id="film-service-date" type="date"></label><label>施工门店<input id="film-store" maxlength="50" value="EP车房·改色·车衣·精洗"></label><label>施工价格（元）<input id="film-price" inputmode="decimal" placeholder="例如 7980"></label></div></div>
+        <div class="film-form-section"><h3>产品信息</h3><div class="form-grid"><label>产品类别<select id="film-category"><option value="window">玻璃膜</option><option value="ppf">漆面保护膜</option><option value="colorChange">改色膜</option><option value="other">其他</option></select></label><label>产品类型<input id="film-product-type" maxlength="50" placeholder="例如 漆面保护膜"></label><label>产品品牌<input id="film-brand" maxlength="50" placeholder="例如 纳科达制造"></label><label>产品系列（选填）<input id="film-series" maxlength="50"></label><label>产品型号<input id="film-model" maxlength="50" placeholder="例如 U-100Q"></label><label>卷膜编号<input id="film-roll-number" maxlength="50" placeholder="例如 4302245139C011"></label><label>质保年限（年）<input id="film-warranty-years" inputmode="numeric" value="0" placeholder="例如 8"></label><label>施工里程（km，选填）<input id="film-mileage" inputmode="numeric" value="0"></label></div></div>
+        <div class="film-form-section"><h3>施工部位与照片</h3><label>施工部位</label><div id="film-positions" class="check-grid"><label><input type="checkbox" value="frontWindshield">前挡</label><label><input type="checkbox" value="rearWindshield">后挡</label><label><input type="checkbox" value="leftFront">左前窗</label><label><input type="checkbox" value="rightFront">右前窗</label><label><input type="checkbox" value="leftRear">左后窗</label><label><input type="checkbox" value="rightRear">右后窗</label><label><input type="checkbox" value="sunroof">天窗</label><label><input type="checkbox" value="fullBody">全车</label><label><input type="checkbox" value="partialBody">局部车身</label><label><input type="checkbox" value="other">其他</label></div><label>施工照片（1-9张）<input id="film-images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="image-preview" class="image-preview"></div><label>施工备注（选填）<textarea id="film-remark" maxlength="200" placeholder="施工说明与注意事项"></textarea></label></div><button id="add-film" class="primary action-button">保存质保档案</button>
       </div>
       <div class="panel action-panel hidden" data-panel="workorder">
         <div class="action-header"><div><div class="eyebrow">SERVICE WORK ORDER</div><h2>施工工单</h2></div><span class="status-dot">施工前后均留档</span></div>
@@ -85,8 +87,8 @@
   </main>
 </div>
 <script src="./config.js?v=20260817-2" charset="UTF-8"></script>
-<script src="./mock-service.js?v=20260817-2" charset="UTF-8"></script>
+<script src="./mock-service.js?v=20260824-1" charset="UTF-8"></script>
 <script src="https://static.cloudbase.net/cloudbase-js-sdk/2.27.1/cloudbase.full.js"></script>
-<script src="./app.js?v=20260817-7" charset="UTF-8"></script>
+<script src="./app.js?v=20260824-1" charset="UTF-8"></script>
 </body>
 </html>
